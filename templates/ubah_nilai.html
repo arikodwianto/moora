@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3>Ubah Nilai</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label>Pesanan</label>
+                    <input type="text" class="form-control" value="{{ nilai.pesanan.pelanggan.nama_pelanggan }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label>Kriteria</label>
+                    <input type="text" class="form-control" value="{{ nilai.kriteria.nama_kriteria }}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label>Nilai</label>
+                    <input type="number" name="nilai" class="form-control" value="{{ nilai.nilai }}" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                <a href="{% url 'list_nilai' %}" class="btn btn-secondary">Batal</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block head %}
+  {{ block.super }}
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Custom styling untuk profil */
+    .profile-card {
+      max-width: 480px;
+      margin: 40px auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      background: #fff;
+      padding: 30px;
+    }
+    .profile-header {
+      font-weight: 600;
+      font-size: 1.75rem;
+      color: #2c3e50;
+      margin-bottom: 25px;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+    .list-group-item {
+      font-size: 1.1rem;
+      border: none;
+      padding-left: 0;
+      padding-right: 0;
+      color: #34495e;
+    }
+    .btn-profile {
+      border-radius: 50px;
+      padding: 0.5rem 1.6rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background-color 0.3s ease;
+    }
+    .btn-primary:hover {
+      background-color: #1a4a8a;
+    }
+    .btn-logout {
+      background-color: #e74c3c;
+      border: none;
+    }
+    .btn-logout:hover {
+      background-color: #c0392b;
+    }
+    .icon {
+      margin-right: 8px;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-card shadow-sm">
+  <h2 class="profile-header">Profil Pengguna</h2>
+
+  <ul class="list-group list-group-flush mb-4">
+    <li class="list-group-item">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" fill="#2980b9" viewBox="0 0 16 16">
+        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+      </svg>
+      <strong>Username:</strong> {{ request.user.username }}
+    </li>
+    <li class="list-group-item">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" fill="#27ae60" viewBox="0 0 16 16">
+        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.5l-8 4.5-8-4.5V4zm0 2.175V12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6.175l-7.5 4.219a.5.5 0 0 1-.5 0L0 6.175z"/>
+      </svg>
+      <strong>Email:</strong> {{ request.user.email }}
+    </li>
+  </ul>
+
+  <div class="d-flex justify-content-center gap-3">
+    <a href="{% url 'change_password' %}" class="btn btn-primary btn-profile">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M10.5 3a2.5 2.5 0 0 0-5 0v1h5V3z"/>
+        <path d="M3 7h10v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+      </svg>
+      Ubah Password
+    </a>
+   
+  </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

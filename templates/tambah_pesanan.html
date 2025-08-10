@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3>Tambah Pesanan</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label>Pelanggan</label>
+                    <select name="pelanggan" class="form-control" required>
+                        {% for p in pelanggan_list %}
+                        <option value="{{ p.id }}">{{ p.nama_pelanggan }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Jumlah Galon</label>
+                    <input type="number" name="jumlah_galon" class="form-control" placeholder="Masukkan jumlah galon" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Tanggal Pengiriman</label>
+                    <input type="date" name="tanggal_pengiriman" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                <a href="{% url 'list_pesanan' %}" class="btn btn-secondary">Batal</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

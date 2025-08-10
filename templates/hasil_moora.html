@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Hasil Analisa MOORA{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Hasil Analisa MOORA</h1>
+
+    <!-- 1️⃣ Nilai Awal -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Nilai Awal (Matriks Keputusan)
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Pesanan</th>
+                        {% for k in kriteria_list %}
+                            <th>{{ k.nama_kriteria }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in pesanan_list %}
+                        <tr>
+                            <td>{{ i.id }} - {{ i.pelanggan.nama_pelanggan }}</td>
+                            {% for val in matrix|slice:forloop.counter0 %}
+                                <td>{{ val }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2️⃣ Nilai Normalisasi -->
+    
+
+    <!-- 4️⃣ Nilai Preferensi -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            Nilai Preferensi (S)
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Pesanan</th>
+                        <th>Skor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in preferensi %}
+                        <tr>
+                            <td>{{ p.pesanan.id }} - {{ p.pesanan.pelanggan.nama_pelanggan }}</td>
+                            <td>{{ p.skor|floatformat:3 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Misal ini di atas tabel ranking -->
+<a href="{% url 'cetak_hasil_moora_pdf' %}" target="_blank" class="btn btn-primary mb-3">
+    Cetak PDF
+</a>
+
+
+    <!-- 5️⃣ Perangkingan -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            Perangkingan
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Rank</th>
+                        <th>Pesanan</th>
+                        <th>Skor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in ranking %}
+                        <tr>
+                            <td>{{ r.rank }}</td>
+                            <td>{{ r.pesanan.id }} - {{ r.pesanan.pelanggan.nama_pelanggan }}</td>
+                            <td>{{ r.skor|floatformat:3 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Sisipkan CDN Chart.js di head atau sebelum </body> -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Tempat canvas untuk chart -->
+<div class="card mb-4">
+    <div class="card-header bg-success text-white">
+        Diagram Batang Perangkingan
+    </div>
+    <div class="card-body">
+        <canvas id="barChart"></canvas>
+        <button id="sortBtn" class="btn btn-secondary mt-3">Urutkan Skor (Asc/Dsc)</button>
+    </div>
+</div>
+
+<script>
+    // Ambil data dari Django context yang sudah dikirim ke template
+    const rankingData = [
+        {% for r in ranking %}
+        {
+            pesanan: "{{ r.pesanan.id }} - {{ r.pesanan.pelanggan.nama_pelanggan }}",
+            skor: {{ r.skor|floatformat:3 }}
+        },
+        {% endfor %}
+    ];
+
+    // Inisialisasi chart dengan data awal
+    let sortAscending = true;
+    const ctx = document.getElementById('barChart').getContext('2d');
+    let barChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: rankingData.map(r => r.pesanan),
+            datasets: [{
+                label: 'Skor',
+                data: rankingData.map(r => r.skor),
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Fungsi sorting dan update chart
+    document.getElementById('sortBtn').addEventListener('click', () => {
+        if(sortAscending) {
+            rankingData.sort((a, b) => a.skor - b.skor);
+        } else {
+            rankingData.sort((a, b) => b.skor - a.skor);
+        }
+        sortAscending = !sortAscending;
+
+        // Update chart dengan data baru
+        barChart.data.labels = rankingData.map(r => r.pesanan);
+        barChart.data.datasets[0].data = rankingData.map(r => r.skor);
+        barChart.update();
+    });
+</script>
+
+
+{% endblock %}
+

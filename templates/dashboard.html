@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-5 fw-bold">Dashboard Sistem Pendukung Keputusan - MOORA</h2>
+
+    <!-- Statistik -->
+    <div class="row g-4">
+        <!-- Pelanggan -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100 card-hover">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-3 text-secondary"></i>
+                    <h5 class="card-title">Pelanggan</h5>
+                    <h2 class="fw-bold">{{ jumlah_pelanggan|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pesanan -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100 card-hover">
+                <div class="card-body text-center">
+                    <i class="fas fa-shopping-cart fa-2x mb-3 text-secondary"></i>
+                    <h5 class="card-title">Pesanan</h5>
+                    <h2 class="fw-bold">{{ jumlah_pesanan|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kriteria -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100 card-hover">
+                <div class="card-body text-center">
+                    <i class="fas fa-list-alt fa-2x mb-3 text-secondary"></i>
+                    <h5 class="card-title">Kriteria</h5>
+                    <h2 class="fw-bold">{{ jumlah_kriteria|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nilai -->
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100 card-hover">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x mb-3 text-secondary"></i>
+                    <h5 class="card-title">Nilai</h5>
+                    <h2 class="fw-bold">{{ jumlah_nilai|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Penjelasan MOORA -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-3">Tentang Metode MOORA</h4>
+                    <p>
+                        <strong>MOORA</strong> (Multi-Objective Optimization on the basis of Ratio Analysis) adalah 
+                        metode pengambilan keputusan multikriteria yang digunakan untuk menentukan alternatif terbaik 
+                        berdasarkan beberapa kriteria. Metode ini bekerja dengan cara:
+                    </p>
+                    <ol>
+                        <li>Menyusun matriks keputusan berdasarkan data alternatif dan kriteria.</li>
+                        <li>Menormalisasi nilai setiap kriteria.</li>
+                        <li>Mengalikan nilai normalisasi dengan bobot kriteria.</li>
+                        <li>Menjumlahkan hasil untuk kriteria manfaat dan mengurangkan untuk kriteria biaya.</li>
+                        <li>Alternatif dengan nilai akhir tertinggi menjadi pilihan terbaik.</li>
+                    </ol>
+                    <p>
+                        Dalam sistem ini, MOORA digunakan untuk membantu menentukan prioritas pesanan atau pelanggan
+                        berdasarkan kriteria yang telah ditentukan, sehingga keputusan dapat dibuat secara lebih objektif dan cepat.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS Hover -->
+<style>
+.card-hover {
+    transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+    border-radius: 10px;
+}
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+}
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}

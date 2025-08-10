@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Ubah Pesanan{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Ubah Pesanan</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="pelanggan" class="form-label">Pelanggan</label>
+                    <select class="form-control" name="pelanggan" id="pelanggan" required>
+                        {% for p in pelanggan_list %}
+                            <option value="{{ p.id }}" {% if p.id == pesanan.pelanggan.id %}selected{% endif %}>
+                                {{ p.nama_pelanggan }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="jumlah_galon" class="form-label">Jumlah Galon</label>
+                    <input type="number" class="form-control" id="jumlah_galon" name="jumlah_galon" value="{{ pesanan.jumlah_galon }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="tanggal_pengiriman" class="form-label">Tanggal Pengiriman</label>
+                    <input type="date" class="form-control" id="tanggal_pengiriman" name="tanggal_pengiriman" value="{{ pesanan.tanggal_pengiriman|date:'Y-m-d' }}" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                <a href="{% url 'list_pesanan' %}" class="btn btn-secondary">Batal</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

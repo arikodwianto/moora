@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Laporan Pesanan Bulanan</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #333; padding: 5px; text-align: left; }
+        th { background-color: #eee; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">Laporan Pesanan Bulanan</h2>
+    <p>Bulan: {{ bulan }}, Tahun: {{ tahun }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Pelanggan</th>
+                <th>Jumlah Galon</th>
+                <th>Tanggal Pesan</th>
+                <th>Tanggal Pengiriman</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if pesanan %}
+                {% for p in pesanan %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ p.pelanggan.nama_pelanggan }}</td>
+                    <td>{{ p.jumlah_galon }}</td>
+                    <td>{{ p.tanggal_pesan|date:"d-m-Y" }}</td>
+                    <td>{{ p.tanggal_pengiriman|date:"d-m-Y" }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td colspan="5" style="text-align:center;">Tidak ada data</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+</body>
+</html>

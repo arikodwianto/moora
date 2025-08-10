@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3>Tambah Nilai</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label>Pesanan</label>
+                    <select name="pesanan" class="form-control" required>
+                        {% for ps in pesanan_list %}
+                        <option value="{{ ps.id }}">{{ ps }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% for k in kriteria_list %}
+                <div class="mb-3">
+                    <label>{{ k.nama_kriteria }}</label>
+                    <input type="number" step="0.01" name="kriteria_{{ k.id }}" class="form-control" placeholder="Masukkan nilai untuk {{ k.nama_kriteria }}" required>
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary">Simpan</button>
+                <a href="{% url 'list_nilai' %}" class="btn btn-secondary">Batal</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
