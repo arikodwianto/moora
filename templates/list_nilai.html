@@ -10,6 +10,7 @@
             <table id="nilaiTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
+                        <th>No</th>
                         <th>Pesanan</th>
                         <th>Kriteria</th>
                         <th>Nilai</th>
@@ -19,6 +20,7 @@
                 <tbody>
                     {% for n in nilai %}
                     <tr>
+                        <td>{{ forloop.counter }}</td>
                         <td>{{ n.pesanan }}</td>
                         <td>{{ n.kriteria.nama_kriteria }}</td>
                         <td>{{ n.nilai }}</td>
@@ -29,8 +31,14 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center">Belum ada nilai</td>
-                    </tr>
+    <td colspan="5" class="text-center text-muted">
+        <div>
+            <i class="bi bi-clipboard-x" style="font-size: 3rem;"></i>
+        </div>
+        Belum ada nilai
+    </td>
+</tr>
+
                     {% endfor %}
                 </tbody>
             </table>

@@ -56,9 +56,15 @@
                     </tr>
                     {% endfor %}
                 {% else %}
-                <tr>
-                    <td colspan="5" class="text-center py-4">Data tidak ditemukan.</td>
-                </tr>
+               <tr>
+    <td colspan="5" class="text-center text-muted py-4">
+        <div>
+            <i class="bi bi-search" style="font-size: 3rem;"></i>
+        </div>
+        Data tidak ditemukan.
+    </td>
+</tr>
+
                 {% endif %}
             </tbody>
         </table>

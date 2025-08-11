@@ -10,6 +10,7 @@
             <table id="pesananTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
+                        <th>No</th>
                         <th>Pelanggan</th>
                         <th>Tanggal Pesan</th>
                         <th>Jumlah Galon</th>
@@ -20,6 +21,7 @@
                 <tbody>
                     {% for ps in pesanan %}
                     <tr>
+                        <td>{{ forloop.counter }}</td>
                         <td>{{ ps.pelanggan.nama_pelanggan }}</td>
                         <td>{{ ps.tanggal_pesan }}</td>
                         <td>{{ ps.jumlah_galon }}</td>
@@ -32,8 +34,14 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center">Belum ada pesanan</td>
-                    </tr>
+    <td colspan="6" class="text-center text-muted">
+        <div>
+            <i class="bi bi-cart-x-fill" style="font-size: 3rem;"></i>
+        </div>
+        Belum ada pesanan
+    </td>
+</tr>
+
                     {% endfor %}
                 </tbody>
             </table>
