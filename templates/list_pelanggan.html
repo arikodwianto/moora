@@ -14,7 +14,6 @@
                         <th>Nama</th>
                         <th>Alamat</th>
                         <th>No HP</th>
-                        <th>Prioritas</th>
                         <th>Aksi</th>   
                     </tr>
                 </thead>
@@ -24,8 +23,7 @@
                         <td>{{ p.nama_pelanggan }}</td>
                         <td>{{ p.alamat }}</td>
                         <td>{{ p.no_hp }}</td>
-                        <td>{{ p.prioritas }}</td>
-                        <td>
+                          <td>
                             <a href="{% url 'ubah_pelanggan' p.id %}" class="btn btn-warning btn-sm">Ubah</a>
                             <a href="{% url 'hapus_pelanggan' p.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus data ini?')">Hapus</a>
                         </td>

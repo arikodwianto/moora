@@ -4,10 +4,10 @@ class Pelanggan(models.Model):
     nama_pelanggan = models.CharField(max_length=200)
     alamat = models.TextField()
     no_hp = models.CharField(max_length=20)
-    prioritas = models.IntegerField()
 
     def __str__(self):
         return self.nama_pelanggan
+
 
 class Pesanan(models.Model):
     pelanggan = models.ForeignKey(Pelanggan, on_delete=models.CASCADE)

@@ -118,6 +118,7 @@ table.dataTable {
 	</style>
 	<!-- DataTables CSS Bootstrap 5 -->
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 	
@@ -246,14 +247,22 @@ table.dataTable {
 <main class="content">
   <div class="container mt-3">
 
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor %}
+   {% if messages %}
+  {% for message in messages %}
+    {% if message.tags == 'success' %}
+      <script>
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: '{{ message }}',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      </script>
     {% endif %}
+  {% endfor %}
+{% endif %}
+
 
     {% block content %}
     <!-- konten lain -->

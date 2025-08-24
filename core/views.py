@@ -81,12 +81,10 @@ def tambah_pelanggan(request):
         nama = request.POST['nama']
         alamat = request.POST['alamat']
         no_hp = request.POST['no_hp']
-        prioritas = request.POST['prioritas']
         Pelanggan.objects.create(
             nama_pelanggan=nama,
             alamat=alamat,
             no_hp=no_hp,
-            prioritas=prioritas
         )
         messages.success(request, "Data pelanggan berhasil ditambahkan.")
         return redirect('list_pelanggan')
@@ -106,7 +104,6 @@ def ubah_pelanggan(request, id):
         pelanggan.nama_pelanggan = request.POST['nama']
         pelanggan.alamat = request.POST['alamat']
         pelanggan.no_hp = request.POST['no_hp']
-        pelanggan.prioritas = request.POST['prioritas']
         pelanggan.save()
         messages.success(request, "Data pelanggan berhasil diubah.")
         return redirect('list_pelanggan')
