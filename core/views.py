@@ -145,7 +145,16 @@ def tambah_pesanan(request):
 @login_required
 def list_pesanan(request):
     data = Pesanan.objects.all()
-    return render(request, 'pesanan/list_pesanan.html', {'pesanan': data})
+    total_selesai = Pesanan.objects.filter(status=True).count()
+    total_belum = Pesanan.objects.filter(status=False).count()
+
+    context = {
+        'pesanan': data,
+        'total_selesai': total_selesai,
+        'total_belum': total_belum,
+    }
+    return render(request, 'pesanan/list_pesanan.html', context)
+
 
 @login_required
 def ubah_pesanan(request, id):
@@ -363,9 +372,11 @@ from .models import Kriteria, Pesanan, Nilai
 
 @login_required
 def hasil_moora(request):
-    # Ambil semua kriteria dan pesanan
+    # Ambil semua kriteria
     kriteria_list = list(Kriteria.objects.all())
-    pesanan_list = list(Pesanan.objects.all())
+
+    # Ambil hanya pesanan yang belum selesai (status=False)
+    pesanan_list = list(Pesanan.objects.filter(status=False))
 
     if not kriteria_list or not pesanan_list:
         return render(request, 'hasil/hasil_moora.html', {'ranking': []})
@@ -415,6 +426,7 @@ def hasil_moora(request):
         "hasil": hasil,
         "ranking": ranking
     })
+
 
 
 import numpy as np
