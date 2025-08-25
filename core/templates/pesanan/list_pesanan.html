@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Judul -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body text-center">
+            <h2 class="fw-bold mb-0">Daftar Pesanan - MOORA</h2>
+        </div>
+    </div>
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Data Pesanan</h5>
+            <a href="{% url 'tambah_pesanan' %}" class="btn btn-success btn-sm">
+                <i class="bi bi-folder-plus"></i> Tambah Pesanan
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="pesananTable" class="table table-bordered table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>Pelanggan</th>
+                            <th>Jumlah Galon</th>
+                            <th>Tanggal Pesan</th>
+                            <th>Tanggal Pengiriman</th>
+                            <th>Status / Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in pesanan %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ p.pelanggan.nama_pelanggan }}</td>
+                            <td>{{ p.jumlah_galon }}</td>
+                            <td>{{ p.tanggal_pesan|date:"d-m-Y" }}</td>
+                            <td>{{ p.tanggal_pengiriman|date:"d-m-Y" }}</td>
+                            <td>
+                                {% if p.status %}
+                                    <span class="badge bg-success">Selesai</span>
+                                {% else %}
+                                    <a href="{% url 'selesai_pesanan' p.id %}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-check2-circle"></i> Selesaikan
+                                    </a>
+                                    <a href="{% url 'ubah_pesanan' p.id %}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="{% url 'hapus_pesanan' p.id %}" class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Yakin hapus pesanan ini?')">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-bag-x display-6 d-block mb-2 shake-icon"></i>
+                                Belum ada data pesanan
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+  $('#pesananTable').DataTable({
+    paging: true,
+    searching: true,
+    ordering: true,
+    pageLength: 10,
+    lengthChange: false,
+    language: {
+      search: "Cari:",
+      zeroRecords: "Data tidak ditemukan",
+      info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+      infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+      paginate: {
+        first: "Pertama",
+        last: "Terakhir",
+        next: "Berikutnya",
+        previous: "Sebelumnya"
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

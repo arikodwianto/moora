@@ -20,6 +20,7 @@ urlpatterns = [
     path('pesanan/tambah/', views.tambah_pesanan, name='tambah_pesanan'),
     path('pesanan/ubah/<int:id>/', views.ubah_pesanan, name='ubah_pesanan'),
     path('pesanan/hapus/<int:id>/', views.hapus_pesanan, name='hapus_pesanan'),
+    path('pesanan/selesai/<int:id>/', views.selesai_pesanan, name='selesai_pesanan'),
 
     # Kriteria
     path('kriteria/', views.list_kriteria, name='list_kriteria'),

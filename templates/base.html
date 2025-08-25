@@ -114,6 +114,17 @@ table.dataTable {
   opacity: 1;
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  75% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+}
+.shake-icon {
+    display: inline-block;
+    animation: shake 0.7s infinite;
+}
+
 
 	</style>
 	<!-- DataTables CSS Bootstrap 5 -->
@@ -139,7 +150,7 @@ table.dataTable {
 
       <li class="sidebar-item">
         <a class="sidebar-link" href="{% url 'dashboard' %}">
-          <i class="align-middle" data-feather="home"></i>
+          <i class="bi bi-house-add-fill"></i>
           <span class="align-middle">Dashboard</span>
         </a>
       </li>
@@ -290,6 +301,7 @@ table.dataTable {
     </div>
   </div>
 </footer>
+</div>
 
 
 
@@ -358,6 +370,117 @@ table.dataTable {
       });
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Label pesanan
+    const labelsPesanan = [
+        {% for row in hasil %}"{{ row.pesanan.pelanggan.nama_pelanggan }}",{% endfor %}
+    ];
+
+    // Matriks Keputusan (X)
+    const dataX = {
+        labels: labelsPesanan,
+        datasets: [
+            {% for k in kriteria_list %}
+            {
+                label: "{{ k.nama_kriteria }}",
+                data: [
+                    {% for row in hasil %}{{ row.x|floatformat:2 }},{% endfor %}
+                ],
+                borderWidth: 1,
+                backgroundColor: 'rgba(255, 99, 132, 0.5)'
+            },
+            {% endfor %}
+        ]
+    };
+
+    new Chart(document.getElementById('chartX'), {
+        type: 'bar',
+        data: dataX,
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Normalisasi (R)
+    const dataR = {
+        labels: labelsPesanan,
+        datasets: [
+            {% for k in kriteria_list %}
+            {
+                label: "{{ k.nama_kriteria }}",
+                data: [
+                    {% for row in hasil %}{{ row.r|join:"," }},{% endfor %}
+                ],
+                borderWidth: 1,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)'
+            },
+            {% endfor %}
+        ]
+    };
+
+    new Chart(document.getElementById('chartR'), {
+        type: 'bar',
+        data: dataR,
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Optimasi (Y)
+    const dataY = {
+        labels: labelsPesanan,
+        datasets: [
+            {% for k in kriteria_list %}
+            {
+                label: "{{ k.nama_kriteria }}",
+                data: [
+                    {% for row in hasil %}{{ row.y|join:"," }},{% endfor %}
+                ],
+                borderWidth: 1,
+                backgroundColor: 'rgba(255, 206, 86, 0.5)'
+            },
+            {% endfor %}
+        ]
+    };
+
+    new Chart(document.getElementById('chartY'), {
+        type: 'bar',
+        data: dataY,
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Skor MOORA (Preferensi)
+    const dataS = {
+        labels: labelsPesanan,
+        datasets: [{
+            label: "Skor Preferensi",
+            data: [{% for row in hasil %}{{ row.skor|floatformat:4 }},{% endfor %}],
+            borderWidth: 1,
+            backgroundColor: 'rgba(75, 192, 192, 0.5)'
+        }]
+    };
+
+    new Chart(document.getElementById('chartS'), {
+        type: 'bar',
+        data: dataS,
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Ranking Akhir
+    const dataRank = {
+        labels: [{% for row in ranking %}"{{ row.pesanan.pelanggan.nama_pelanggan }}",{% endfor %}],
+        datasets: [{
+            label: "Skor MOORA",
+            data: [{% for row in ranking %}{{ row.skor|floatformat:4 }},{% endfor %}],
+            borderWidth: 1,
+            backgroundColor: 'rgba(153, 102, 255, 0.5)'
+        }]
+    };
+
+    new Chart(document.getElementById('mooraChart'), {
+        type: 'bar',
+        data: dataRank,
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+</script>
+
 
   {% block extra_js %}
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>

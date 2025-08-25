@@ -2,17 +2,22 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="text-center mb-5 fw-bold">Dashboard Sistem Pendukung Keputusan - MOORA</h2>
+    <!-- Judul -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body text-center">
+            <h2 class="fw-bold mb-0">Dashboard Sistem Pendukung Keputusan - MOORA</h2>
+        </div>
+    </div>
 
     <!-- Statistik -->
-    <div class="row g-4">
+    <div class="row g-4 mb-5">
         <!-- Pelanggan -->
         <div class="col-md-3">
             <div class="card shadow-sm border-0 h-100 card-hover">
                 <div class="card-body text-center">
-                    <i class="fas fa-users fa-2x mb-3 text-secondary"></i>
-                    <h5 class="card-title">Pelanggan</h5>
-                    <h2 class="fw-bold">{{ jumlah_pelanggan|default:"0" }}</h2>
+                    <i class="bi bi-people-fill display-6 mb-3 text-primary"></i>
+                    <h6 class="fw-semibold">Pelanggan</h6>
+                    <h2 class="fw-bold text-dark">{{ jumlah_pelanggan|default:"0" }}</h2>
                 </div>
             </div>
         </div>
@@ -21,9 +26,9 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 h-100 card-hover">
                 <div class="card-body text-center">
-                    <i class="fas fa-shopping-cart fa-2x mb-3 text-secondary"></i>
-                    <h5 class="card-title">Pesanan</h5>
-                    <h2 class="fw-bold">{{ jumlah_pesanan|default:"0" }}</h2>
+                    <i class="bi bi-basket-fill display-6 mb-3 text-success"></i>
+                    <h6 class="fw-semibold">Pesanan</h6>
+                    <h2 class="fw-bold text-dark">{{ jumlah_pesanan|default:"0" }}</h2>
                 </div>
             </div>
         </div>
@@ -32,9 +37,9 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 h-100 card-hover">
                 <div class="card-body text-center">
-                    <i class="fas fa-list-alt fa-2x mb-3 text-secondary"></i>
-                    <h5 class="card-title">Kriteria</h5>
-                    <h2 class="fw-bold">{{ jumlah_kriteria|default:"0" }}</h2>
+                    <i class="bi bi-list-check display-6 mb-3 text-warning"></i>
+                    <h6 class="fw-semibold">Kriteria</h6>
+                    <h2 class="fw-bold text-dark">{{ jumlah_kriteria|default:"0" }}</h2>
                 </div>
             </div>
         </div>
@@ -43,38 +48,56 @@
         <div class="col-md-3">
             <div class="card shadow-sm border-0 h-100 card-hover">
                 <div class="card-body text-center">
-                    <i class="fas fa-star fa-2x mb-3 text-secondary"></i>
-                    <h5 class="card-title">Nilai</h5>
-                    <h2 class="fw-bold">{{ jumlah_nilai|default:"0" }}</h2>
+                    <i class="bi bi-star-fill display-6 mb-3 text-danger"></i>
+                    <h6 class="fw-semibold">Nilai</h6>
+                    <h2 class="fw-bold text-dark">{{ jumlah_nilai|default:"0" }}</h2>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Diagram Pesanan Bulanan -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white fw-bold d-flex justify-content-between align-items-center">
+            <span>Pesanan Bulanan Tahun {{ tahun }}</span>
+            <form method="get" class="d-flex">
+                <select name="tahun" class="form-select form-select-sm me-2" onchange="this.form.submit()">
+                    {% for t in tahun_list %}
+                        <option value="{{ t }}" {% if t == tahun %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+                <noscript><button class="btn btn-sm btn-light">Filter</button></noscript>
+            </form>
+        </div>
+        <div class="card-body">
+            <canvas id="pesananBulananChart" height="100"></canvas>
+        </div>
+    </div>
+
+
+
 
     <!-- Penjelasan MOORA -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h4 class="fw-bold mb-3">Tentang Metode MOORA</h4>
-                    <p>
-                        <strong>MOORA</strong> (Multi-Objective Optimization on the basis of Ratio Analysis) adalah 
-                        metode pengambilan keputusan multikriteria yang digunakan untuk menentukan alternatif terbaik 
-                        berdasarkan beberapa kriteria. Metode ini bekerja dengan cara:
-                    </p>
-                    <ol>
-                        <li>Menyusun matriks keputusan berdasarkan data alternatif dan kriteria.</li>
-                        <li>Menormalisasi nilai setiap kriteria.</li>
-                        <li>Mengalikan nilai normalisasi dengan bobot kriteria.</li>
-                        <li>Menjumlahkan hasil untuk kriteria manfaat dan mengurangkan untuk kriteria biaya.</li>
-                        <li>Alternatif dengan nilai akhir tertinggi menjadi pilihan terbaik.</li>
-                    </ol>
-                    <p>
-                        Dalam sistem ini, MOORA digunakan untuk membantu menentukan prioritas pesanan atau pelanggan
-                        berdasarkan kriteria yang telah ditentukan, sehingga keputusan dapat dibuat secara lebih objektif dan cepat.
-                    </p>
-                </div>
-            </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0 fw-semibold">Tentang Metode MOORA</h5>
+        </div>
+        <div class="card-body">
+            <p>
+                <strong>MOORA</strong> (Multi-Objective Optimization on the basis of Ratio Analysis) adalah 
+                metode pengambilan keputusan multikriteria yang digunakan untuk menentukan alternatif terbaik 
+                berdasarkan beberapa kriteria. Metode ini bekerja dengan cara:
+            </p>
+            <ol>
+                <li>Menyusun matriks keputusan berdasarkan data alternatif dan kriteria.</li>
+                <li>Menormalisasi nilai setiap kriteria.</li>
+                <li>Mengalikan nilai normalisasi dengan bobot kriteria.</li>
+                <li>Menjumlahkan hasil untuk kriteria manfaat dan mengurangkan untuk kriteria biaya.</li>
+                <li>Alternatif dengan nilai akhir tertinggi menjadi pilihan terbaik.</li>
+            </ol>
+            <p>
+                Dalam sistem ini, MOORA digunakan untuk membantu menentukan prioritas pesanan atau pelanggan
+                berdasarkan kriteria yang telah ditentukan, sehingga keputusan dapat dibuat secara lebih objektif dan cepat.
+            </p>
         </div>
     </div>
 </div>
@@ -83,14 +106,42 @@
 <style>
 .card-hover {
     transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
-    border-radius: 10px;
+    border-radius: 12px;
 }
 .card-hover:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 </style>
-
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('pesananBulananChart').getContext('2d');
+    const pesananBulananChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: 'Jumlah Pesanan',
+                data: {{ data|safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Jumlah Pesanan per Bulan ({{ tahun }})'
+                }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
 {% endblock %}

@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Judul -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body text-center">
+            <h2 class="fw-bold mb-0">Hasil Perhitungan MOORA</h2>
+        </div>
+    </div>
+   
+
+    <!-- Matriks Keputusan -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white fw-bold">
+            Tabel 1. Matriks Keputusan (X)
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Pesanan</th>
+                        {% for k in kriteria_list %}
+                            <th>{{ k.nama_kriteria }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in hasil %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.pesanan.pelanggan.nama_pelanggan }}</td>
+                        {% for val in row.x %}
+                        <td>{{ val|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h6 class="fw-bold mt-4">Diagram Matriks Keputusan (X)</h6>
+            <canvas id="chartX" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Normalisasi -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white fw-bold">
+            Tabel 2. Normalisasi (R)
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Pesanan</th>
+                        {% for k in kriteria_list %}
+                            <th>{{ k.nama_kriteria }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in hasil %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.pesanan.pelanggan.nama_pelanggan }}</td>
+                        {% for val in row.r %}
+                        <td>{{ val|floatformat:4 }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h6 class="fw-bold mt-4">Diagram Normalisasi (R)</h6>
+            <canvas id="chartR" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Optimasi -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning fw-bold">
+            Tabel 3. Optimasi (Y = R * Bobot)
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Pesanan</th>
+                        {% for k in kriteria_list %}
+                            <th>{{ k.nama_kriteria }} ({{ k.bobot }})</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in hasil %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.pesanan.pelanggan.nama_pelanggan }}</td>
+                        {% for val in row.y %}
+                        <td>{{ val|floatformat:4 }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h6 class="fw-bold mt-4">Diagram Optimasi (Y)</h6>
+            <canvas id="chartY" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Nilai Preferensi -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-secondary text-white fw-bold">
+            Tabel 4. Nilai Preferensi
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered text-center">
+                <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Pesanan</th>
+                        <th>Skor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in hasil %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.pesanan.pelanggan.nama_pelanggan }}</td>
+                        <td>{{ row.skor|floatformat:4 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h6 class="fw-bold mt-4">Diagram Nilai Preferensi</h6>
+            <canvas id="chartS" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Ranking -->
+  <!-- Ranking -->
+<div class="card shadow-sm ">
+    <div class="card shadow-sm">
+    <div class="card-header bg-success text-white fw-bold d-flex justify-content-between align-items-center">
+        <span>Tabel 5. Ranking Akhir</span>
+        <a href="{% url 'cetak_hasil_moora_pdf' %}" 
+           class="btn btn-danger btn-sm shadow-sm" target="_blank">
+           <i class="bi bi-file-earmark-pdf"></i> Cetak PDF
+        </a>
+    </div>
+</div>
+
+    
+    <div class="card-body">
+        
+        <table class="table table-striped text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>No</th>
+                    <th>Rank</th>
+                    <th>Pesanan</th>
+                    <th>Skor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in ranking %}
+                <tr {% if forloop.first %}class="table-success fw-bold"{% endif %}>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.rank }}</td>
+                    <td>{{ row.pesanan.pelanggan.nama_pelanggan }}</td>
+                    <td>{{ row.skor|floatformat:4 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Tombol Cetak PDF -->
+       
+
+        <h6 class="fw-bold mt-4">Diagram Hasil MOORA</h6>
+        <canvas id="mooraChart" height="100"></canvas>
+    </div>
+</div>
+
+</div>
+{% endblock %}

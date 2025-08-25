@@ -1,16 +1,20 @@
-from django.shortcuts import render, redirect
-from .models import Pelanggan, Pesanan, Kriteria, Nilai
-from django.utils import timezone
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from weasyprint import HTML
-from .models import Pesanan
-
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.contrib import messages
+from django.db.models.functions import ExtractMonth, ExtractYear
+from django.template.loader import render_to_string
+
+from .models import Pelanggan, Pesanan, Kriteria, Nilai
+
+from django.utils import timezone
+from weasyprint import HTML
+import datetime
+import numpy as np
+
+
 
 # Register view
 def register_view(request):
@@ -21,7 +25,7 @@ def register_view(request):
             return redirect('login')
     else:
         form = UserCreationForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'auth/register.html', {'form': form})
 
 # Login view
 def login_view(request):
@@ -41,7 +45,7 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'auth/login.html', {'form': form})
 
 
 # Logfrom django.contrib import messages
@@ -56,7 +60,7 @@ def logout_view(request):
 # Profile view (tampilkan info user dan link ubah password)
 @login_required
 def profile_view(request):
-    return render(request, 'profile.html')
+    return render(request, 'auth/profile.html')
 
 # Ubah password
 @login_required
@@ -70,7 +74,7 @@ def change_password(request):
             return redirect('profile')
     else:
         form = PasswordChangeForm(request.user)
-    return render(request, 'change_password.html', {'form': form})
+    return render(request, 'auth/change_password.html', {'form': form})
 
 
 
@@ -88,13 +92,13 @@ def tambah_pelanggan(request):
         )
         messages.success(request, "Data pelanggan berhasil ditambahkan.")
         return redirect('list_pelanggan')
-    return render(request, 'tambah_pelanggan.html')
+    return render(request, 'pelanggan/tambah_pelanggan.html')
 
 
 @login_required
 def list_pelanggan(request):
     data = Pelanggan.objects.all()
-    return render(request, 'list_pelanggan.html', {'pelanggan': data})
+    return render(request, 'pelanggan/list_pelanggan.html', {'pelanggan': data})
 
 
 @login_required
@@ -107,7 +111,7 @@ def ubah_pelanggan(request, id):
         pelanggan.save()
         messages.success(request, "Data pelanggan berhasil diubah.")
         return redirect('list_pelanggan')
-    return render(request, 'ubah_pelanggan.html', {'pelanggan': pelanggan})
+    return render(request, 'pelanggan/ubah_pelanggan.html', {'pelanggan': pelanggan})
 
 
 @login_required
@@ -136,12 +140,12 @@ def tambah_pesanan(request):
         )
         messages.success(request, "Pesanan berhasil ditambahkan.")
         return redirect('list_pesanan')
-    return render(request, 'tambah_pesanan.html', {'pelanggan_list': pelanggan_list})
+    return render(request, 'pesanan/tambah_pesanan.html', {'pelanggan_list': pelanggan_list})
 
 @login_required
 def list_pesanan(request):
     data = Pesanan.objects.all()
-    return render(request, 'list_pesanan.html', {'pesanan': data})
+    return render(request, 'pesanan/list_pesanan.html', {'pesanan': data})
 
 @login_required
 def ubah_pesanan(request, id):
@@ -154,7 +158,7 @@ def ubah_pesanan(request, id):
         pesanan.save()
         messages.success(request, "Pesanan berhasil diubah.")
         return redirect('list_pesanan')
-    return render(request, 'ubah_pesanan.html', {'pesanan': pesanan, 'pelanggan_list': pelanggan_list})
+    return render(request, 'pesanan/ubah_pesanan.html', {'pesanan': pesanan, 'pelanggan_list': pelanggan_list})
 
 @login_required
 def hapus_pesanan(request, id):
@@ -163,50 +167,67 @@ def hapus_pesanan(request, id):
     messages.success(request, "Pesanan berhasil dihapus.")
     return redirect('list_pesanan')
 
+@login_required
+def selesai_pesanan(request, id):
+    pesanan = get_object_or_404(Pesanan, id=id)
+    pesanan.status = True
+    pesanan.save()
+    messages.success(request, "Pesanan telah diselesaikan.")
+    return redirect('list_pesanan')
 
-from django.shortcuts import render
-from django.db.models.functions import ExtractMonth, ExtractYear
-from django.http import HttpResponse
-from weasyprint import HTML
-from django.template.loader import render_to_string
-import datetime
+
+
 
 import datetime
+from django.db.models import Count
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from .models import Pesanan  # sesuaikan import model
+from .models import Pesanan
 
 @login_required
 def laporan_pesanan_bulanan(request):
+    # ambil filter dari request
     bulan = request.GET.get('bulan')
     tahun = request.GET.get('tahun')
 
-    pesanan = Pesanan.objects.all()
-
-    if bulan and tahun:
-        pesanan = pesanan.filter(
-            tanggal_pesan__year=tahun,
-            tanggal_pesan__month=bulan
-        )
-    else:
+    if not bulan or not tahun:
         sekarang = datetime.date.today()
         bulan = sekarang.month
         tahun = sekarang.year
-        pesanan = pesanan.filter(
-            tanggal_pesan__year=tahun,
-            tanggal_pesan__month=bulan
-        )
+
+    bulan = int(bulan)
+    tahun = int(tahun)
+
+    # filter data pesanan
+    pesanan = Pesanan.objects.filter(
+        tanggal_pesan__year=tahun,
+        tanggal_pesan__month=bulan
+    )
+
+    # hitung jumlah pesanan per hari dalam bulan terpilih
+    data_harian = (
+        pesanan.values('tanggal_pesan')
+        .annotate(total=Count('id'))
+        .order_by('tanggal_pesan')
+    )
+
+    labels = [p['tanggal_pesan'].strftime("%d-%m") for p in data_harian]
+    data = [p['total'] for p in data_harian]
 
     bulan_list = range(1, 13)
-    tahun_list = range(2022, datetime.date.today().year + 1)  # dari 2022 sampai tahun sekarang
+    tahun_list = range(2022, datetime.date.today().year + 1)
 
     context = {
         'pesanan': pesanan,
-        'bulan': int(bulan),
-        'tahun': int(tahun),
+        'bulan': bulan,
+        'tahun': tahun,
         'bulan_list': bulan_list,
         'tahun_list': tahun_list,
+        'labels': labels,  # untuk chart
+        'data': data,      # untuk chart
     }
-    return render(request, 'laporan_pesanan_bulanan.html', context)
+    return render(request, 'laporan/laporan_pesanan_bulanan.html', context)
+
 
 @login_required
 def cetak_laporan_pesanan_bulanan(request):
@@ -227,7 +248,7 @@ def cetak_laporan_pesanan_bulanan(request):
         'tahun': int(tahun),
     }
 
-    html_string = render_to_string('laporan_pesanan_bulanan_pdf.html', context)
+    html_string = render_to_string('laporan/laporan_pesanan_bulanan_pdf.html', context)
     html = HTML(string=html_string)
     pdf = html.write_pdf()
 
@@ -239,13 +260,7 @@ def cetak_laporan_pesanan_bulanan(request):
 
 
 # Tambah Kriteria
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Kriteria
 
-# ➕ Tambah Kriteria
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
 
 @login_required
 def tambah_kriteria(request):
@@ -260,12 +275,12 @@ def tambah_kriteria(request):
         )
         messages.success(request, "Kriteria berhasil ditambahkan.")
         return redirect('list_kriteria')
-    return render(request, 'tambah_kriteria.html')
+    return render(request, 'kriteria/tambah_kriteria.html')
 
 @login_required
 def list_kriteria(request):
     data = Kriteria.objects.all()
-    return render(request, 'list_kriteria.html', {'kriteria': data})
+    return render(request, 'kriteria/list_kriteria.html', {'kriteria': data})
 
 @login_required
 def ubah_kriteria(request, id):
@@ -277,7 +292,7 @@ def ubah_kriteria(request, id):
         kriteria.save()
         messages.success(request, "Kriteria berhasil diubah.")
         return redirect('list_kriteria')
-    return render(request, 'ubah_kriteria.html', {'kriteria': kriteria})
+    return render(request, 'kriteria/ubah_kriteria.html', {'kriteria': kriteria})
 
 @login_required
 def hapus_kriteria(request, id):
@@ -290,14 +305,14 @@ def hapus_kriteria(request, id):
 
 
 # Tambah Nilai
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
+
 
 @login_required
 def tambah_nilai(request):
-    pesanan_list = Pesanan.objects.all()
+    # hanya ambil pesanan yang belum selesai
+    pesanan_list = Pesanan.objects.filter(status=False)
     kriteria_list = Kriteria.objects.all()
+
     if request.method == "POST":
         pesanan_id = request.POST['pesanan']
         for k in kriteria_list:
@@ -309,12 +324,17 @@ def tambah_nilai(request):
             )
         messages.success(request, "Nilai berhasil ditambahkan.")
         return redirect('list_nilai')
-    return render(request, 'tambah_nilai.html', {'pesanan_list': pesanan_list, 'kriteria_list': kriteria_list})
+    
+    return render(request, 'alternatif/tambah_nilai.html', {
+        'pesanan_list': pesanan_list,
+        'kriteria_list': kriteria_list
+    })
 
 @login_required
 def list_nilai(request):
-    data = Nilai.objects.all()
-    return render(request, 'list_nilai.html', {'nilai': data})
+    data = Nilai.objects.select_related('pesanan', 'kriteria').all()
+    return render(request, 'alternatif/list_nilai.html', {'nilai': data})
+
 
 @login_required
 def ubah_nilai(request, id):
@@ -324,7 +344,7 @@ def ubah_nilai(request, id):
         nilai_obj.save()
         messages.success(request, "Nilai berhasil diubah.")
         return redirect('list_nilai')
-    return render(request, 'ubah_nilai.html', {'nilai': nilai_obj})
+    return render(request, 'alternatif/ubah_nilai.html', {'nilai': nilai_obj})
 
 @login_required
 def hapus_nilai(request, id):
@@ -337,135 +357,186 @@ def hapus_nilai(request, id):
 
 
 import numpy as np
-
-import numpy as np
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from .models import Pelanggan, Pesanan, Kriteria, Nilai
+from .models import Kriteria, Pesanan, Nilai
 
 @login_required
 def hasil_moora(request):
+    # Ambil semua kriteria dan pesanan
     kriteria_list = list(Kriteria.objects.all())
-    bobot = np.array([k.bobot for k in kriteria_list])
+    pesanan_list = list(Pesanan.objects.all())
+
+    if not kriteria_list or not pesanan_list:
+        return render(request, 'hasil/hasil_moora.html', {'ranking': []})
+
+    bobot = np.array([k.bobot for k in kriteria_list], dtype=float)
     tipe = [k.tipe_kriteria for k in kriteria_list]
 
-    pesanan_list = list(Pesanan.objects.all())
-    matrix = []
-
-    # Ambil matriks keputusan (X)
+    # Matriks keputusan (X)
+    X = []
     for pesanan in pesanan_list:
         row = []
         for k in kriteria_list:
-            nilai_obj = Nilai.objects.filter(pesanan=pesanan, kriteria=k).first()
-            if nilai_obj:
-                row.append(float(nilai_obj.nilai))
-            else:
-                row.append(0)
-        matrix.append(row)
+            nilai = Nilai.objects.filter(pesanan=pesanan, kriteria=k).first()
+            row.append(float(nilai.nilai) if nilai else 0)
+        X.append(row)
+    X = np.array(X, dtype=float)
 
-    X = np.array(matrix, dtype=float)
-    if X.size == 0:
-        return render(request, 'hasil_moora.html', {'hasil': []})
-
-    # 1️⃣ Normalisasi
-    denom = np.sqrt((X**2).sum(axis=0))
+    # Normalisasi
+    denom = np.sqrt((X ** 2).sum(axis=0))
+    denom[denom == 0] = 1
     R = X / denom
 
-    # 2️⃣ Optimasi nilai atribut (dikali bobot)
+    # Optimasi (R * bobot)
     Y = R * bobot
 
-    # 3️⃣ Hitung nilai preferensi (benefit - cost)
-    S = []
-    for i in range(len(Y)):
-        benefit_sum = sum(Y[i][j] for j in range(len(kriteria_list)) if tipe[j] == 'benefit')
-        cost_sum = sum(Y[i][j] for j in range(len(kriteria_list)) if tipe[j] == 'cost')
-        skor = benefit_sum - cost_sum
-        S.append({
-            'pesanan': pesanan_list[i],
-            'skor': skor
+    # Hitung preferensi
+    hasil = []
+    for i, pesanan in enumerate(pesanan_list):
+        benefit = sum(Y[i][j] for j in range(len(kriteria_list)) if tipe[j] == "benefit")
+        cost = sum(Y[i][j] for j in range(len(kriteria_list)) if tipe[j] == "cost")
+        skor = benefit - cost
+        hasil.append({
+            "pesanan": pesanan,
+            "x": X[i],
+            "r": R[i],
+            "y": Y[i],
+            "skor": skor
         })
 
-    # 4️⃣ Perangkingan
-    ranking = sorted(S, key=lambda x: x['skor'], reverse=True)
+    # Ranking
+    ranking = sorted(hasil, key=lambda d: d["skor"], reverse=True)
     for idx, item in enumerate(ranking, start=1):
-        item['rank'] = idx
+        item["rank"] = idx
 
-    return render(request, 'hasil_moora.html', {
-        'kriteria_list': kriteria_list,
-        'pesanan_list': pesanan_list,
-        'matrix': X,
-        'normalisasi': R,
-        'optimasi': Y,
-        'preferensi': S,
-        'ranking': ranking
+    return render(request, "hasil/hasil_moora.html", {
+        "kriteria_list": kriteria_list,
+        "hasil": hasil,
+        "ranking": ranking
     })
 
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-from weasyprint import HTML
+
 import numpy as np
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
 
 @login_required
 def cetak_hasil_moora_pdf(request):
     kriteria_list = list(Kriteria.objects.all())
-    bobot = np.array([k.bobot for k in kriteria_list])
-    tipe = [k.tipe_kriteria for k in kriteria_list]
-
     pesanan_list = list(Pesanan.objects.all())
-    matrix = []
 
-    for pesanan in pesanan_list:
-        row = []
-        for k in kriteria_list:
-            nilai_obj = Nilai.objects.filter(pesanan=pesanan, kriteria=k).first()
-            if nilai_obj:
-                row.append(float(nilai_obj.nilai))
-            else:
-                row.append(0)
-        matrix.append(row)
-
-    X = np.array(matrix, dtype=float)
-    if X.size == 0:
+    if not kriteria_list or not pesanan_list:
         ranking = []
     else:
-        denom = np.sqrt((X**2).sum(axis=0))
-        R = X / denom
-        Y = R * bobot
-        S = []
-        for i in range(len(Y)):
-            benefit_sum = sum(Y[i][j] for j in range(len(kriteria_list)) if tipe[j] == 'benefit')
-            cost_sum = sum(Y[i][j] for j in range(len(kriteria_list)) if tipe[j] == 'cost')
-            skor = benefit_sum - cost_sum
-            S.append({
-                'pesanan': pesanan_list[i],
-                'skor': skor
-            })
-        ranking = sorted(S, key=lambda x: x['skor'], reverse=True)
-        for idx, item in enumerate(ranking, start=1):
-            item['rank'] = idx
+        bobot = np.array([k.bobot for k in kriteria_list], dtype=float)
+        tipe = [k.tipe_kriteria for k in kriteria_list]
 
-    # Render HTML dari template
-    html_string = render_to_string('hasil_moora_pdf.html', {
-        'ranking': ranking,
-        'kriteria_list': kriteria_list,
+        # Matriks keputusan
+        X = []
+        for pesanan in pesanan_list:
+            row = []
+            for k in kriteria_list:
+                nilai = Nilai.objects.filter(pesanan=pesanan, kriteria=k).first()
+                row.append(float(nilai.nilai) if nilai else 0)
+            X.append(row)
+        X = np.array(X, dtype=float)
+
+        # Normalisasi
+        denom = np.sqrt((X ** 2).sum(axis=0))
+        denom[denom == 0] = 1
+        R = X / denom
+
+        # Optimasi
+        Y = R * bobot
+
+        # Hitung skor preferensi
+        hasil = []
+        for i, pesanan in enumerate(pesanan_list):
+            benefit = sum(Y[i][j] for j in range(len(kriteria_list)) if tipe[j] == "benefit")
+            cost = sum(Y[i][j] for j in range(len(kriteria_list)) if tipe[j] == "cost")
+            skor = benefit - cost
+            hasil.append({
+                "pesanan": pesanan,
+                "x": list(X[i]),
+                "r": list(R[i]),
+                "y": list(Y[i]),
+                "skor": skor
+            })
+
+        ranking = sorted(hasil, key=lambda d: d["skor"], reverse=True)
+        for idx, item in enumerate(ranking, start=1):
+            item["rank"] = idx
+
+    # Render ke template PDF
+    html_string = render_to_string("hasil/hasil_moora_pdf.html", {
+        "kriteria_list": kriteria_list,
+        "ranking": ranking,
     })
 
-    # Buat PDF dari HTML pakai WeasyPrint
-    html = HTML(string=html_string)
-    pdf_file = html.write_pdf()
+    pdf_file = HTML(string=html_string).write_pdf()
 
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="hasil_moora.pdf"'
+    response = HttpResponse(pdf_file, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="hasil_moora.pdf"'
     return response
+
+
+import datetime
+from django.db.models import Count
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Pelanggan, Pesanan, Kriteria, Nilai
+
+import datetime
+from django.db.models import Count
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Pelanggan, Pesanan, Kriteria, Nilai
 
 @login_required
 def dashboard(request):
+    # Statistik umum
     jumlah_pelanggan = Pelanggan.objects.count()
     jumlah_pesanan = Pesanan.objects.count()
     jumlah_kriteria = Kriteria.objects.count()
     jumlah_nilai = Nilai.objects.count()
+
+    # Ambil filter tahun dari request
+    tahun_sekarang = datetime.date.today().year
+    tahun = request.GET.get('tahun', tahun_sekarang)
+    tahun = int(tahun)
+
+    # Data pesanan per bulan sesuai tahun dipilih
+    pesanan_bulanan = (
+        Pesanan.objects.filter(tanggal_pesan__year=tahun)
+        .values('tanggal_pesan__month')
+        .annotate(total=Count('id'))
+        .order_by('tanggal_pesan__month')
+    )
+
+    labels = []
+    data = []
+    bulan_nama = ["Jan","Feb","Mar","Apr","Mei","Jun",
+                  "Jul","Agu","Sep","Okt","Nov","Des"]
+
+    for i in range(1, 13):
+        labels.append(bulan_nama[i-1])
+        found = next((p['total'] for p in pesanan_bulanan if p['tanggal_pesan__month'] == i), 0)
+        data.append(found)
+
+    # daftar tahun dari 2022 sampai tahun sekarang
+    tahun_list = range(2022, tahun_sekarang + 1)
+
     return render(request, 'dashboard.html', {
         'jumlah_pelanggan': jumlah_pelanggan,
         'jumlah_pesanan': jumlah_pesanan,
         'jumlah_kriteria': jumlah_kriteria,
         'jumlah_nilai': jumlah_nilai,
+        'labels': labels,
+        'data': data,
+        'tahun': tahun,
+        'tahun_list': tahun_list,
     })
+
+

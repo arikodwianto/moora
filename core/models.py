@@ -14,9 +14,11 @@ class Pesanan(models.Model):
     tanggal_pesan = models.DateField()
     jumlah_galon = models.IntegerField()
     tanggal_pengiriman = models.DateField()
+    status = models.BooleanField(default=False)  # False = Belum selesai, True = Selesai
 
     def __str__(self):
-        return f"Pesanan {self.id} - {self.pelanggan.nama_pelanggan}"
+        return f"{self.pelanggan.nama_pelanggan} - {self.jumlah_galon} galon"
+
 
 class Pengiriman(models.Model):
     pesanan = models.ForeignKey(Pesanan, on_delete=models.CASCADE)
