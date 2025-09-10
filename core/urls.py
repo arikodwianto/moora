@@ -2,11 +2,15 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('register/', views.register_view, name='register'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
-    path('profile/', views.profile_view, name='profile'),
-    path('profile/change-password/', views.change_password, name='change_password'),
+    path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_view, name="logout"),
+    path("profile/", views.profile_view, name="profile"),
+    path("add-admin/", views.add_admin_view, name="add_admin"),
+    path("dashboard/", views.profile_view, name="dashboard"),  # sementara pakai
+    path("admin/dashboard/", views.admin_dashboard, name="admin_dashboard"),
+    path("admins/", views.list_admin_view, name="list_admin"),
+    path("admins/<int:user_id>/edit/", views.edit_admin_view, name="edit_admin"),
+    path("admins/<int:user_id>/delete/", views.delete_admin_view, name="delete_admin"),
     
     path('', views.dashboard, name='dashboard'),
     # Pelanggan
@@ -44,4 +48,5 @@ urlpatterns = [
     path('laporan-pesanan-bulanan/', views.laporan_pesanan_bulanan, name='laporan_pesanan_bulanan'),
     path('laporan-pesanan-bulanan/cetak/', views.cetak_laporan_pesanan_bulanan, name='cetak_laporan_pesanan_bulanan'),
     
+
 ]

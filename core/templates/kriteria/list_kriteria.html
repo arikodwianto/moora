@@ -2,11 +2,12 @@
 
 {% block content %}
 <!-- Judul -->
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body text-center">
-            <h2 class="fw-bold mb-0">Daftar Kriteria - MOORA</h2>
-        </div>
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body text-center">
+        <h2 class="fw-bold mb-0">Daftar Kriteria - MOORA</h2>
     </div>
+</div>
+
 <div class="container mt-4">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -32,15 +33,24 @@
                         <td>{{ forloop.counter }}</td>
                         <td>{{ k.nama_kriteria }}</td>
                         <td>{{ k.bobot }}</td>
-                        <td>{{ k.tipe_kriteria }}</td>
+                        <td>
+  {% if k.tipe_kriteria == "benefit" %}
+    <span style="color: green; font-weight: bold;">Benefit</span>
+  {% elif k.tipe_kriteria == "cost" %}
+    <span style="color: red; font-weight: bold;">Cost</span>
+  {% else %}
+    {{ k.tipe_kriteria }}
+  {% endif %}
+</td>
+
                         <td>
                             <a href="{% url 'ubah_kriteria' k.id %}" class="btn btn-warning btn-sm">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <a href="{% url 'hapus_kriteria' k.id %}" 
+                            <a href="{% url 'hapus_kriteria' k.id %}"
                                class="btn btn-danger btn-sm"
                                onclick="return confirm('Yakin ingin menghapus kriteria ini?')">
-                               <i class="bi bi-trash3"></i>
+                                <i class="bi bi-trash3"></i>
                             </a>
                         </td>
                     </tr>
@@ -53,6 +63,33 @@
                     </tr>
                     {% endfor %}
                 </tbody>
+                <tfoot>
+  <tr>
+    <td colspan="2"><strong>Total</strong></td>
+    <td><strong>{{ total_bobot }}</strong></td>
+    <td colspan="2"></td>
+  </tr>
+  {% if status_bobot == "kurang" %}
+  <tr>
+    <td colspan="5" style="color: orange;">
+      ⚠️ Total bobot masih kurang {{ sisa_bobot }}
+    </td>
+  </tr>
+  {% elif status_bobot == "lebih" %}
+  <tr>
+    <td colspan="5" style="color: red;">
+      ❌ Total bobot melebihi 1 ({{ total_bobot }})
+    </td>
+  </tr>
+  {% elif status_bobot == "pas" %}
+  <tr>
+    <td colspan="5" style="color: green;">
+      ✅ Total bobot sudah pas 1
+    </td>
+  </tr>
+  {% endif %}
+</tfoot>
+
             </table>
         </div>
     </div>
@@ -62,25 +99,25 @@
 {% block extra_js %}
 <script>
 $(document).ready(function () {
-  $('#kriteriaTable').DataTable({
-    paging: true,
-    searching: true,
-    ordering: true,
-    pageLength: 10,
-    lengthChange: false,
-    language: {
-      search: "Cari:",
-      zeroRecords: "Data tidak ditemukan",
-      info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-      infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-      paginate: {
-        first: "Pertama",
-        last: "Terakhir",
-        next: "Berikutnya",
-        previous: "Sebelumnya"
-      }
-    }
-  });
+    $('#kriteriaTable').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        pageLength: 10,
+        lengthChange: false,
+        language: {
+            search: "Cari:",
+            zeroRecords: "Data tidak ditemukan",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "Berikutnya",
+                previous: "Sebelumnya"
+            }
+        }
+    });
 });
 </script>
 {% endblock %}

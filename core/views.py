@@ -16,22 +16,32 @@ import numpy as np
 
 
 
-# Register view
-def register_view(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = UserCreationForm()
-    return render(request, 'auth/register.html', {'form': form})
+# views.py
+
+from django.contrib import messages
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.models import User, Group
+from django.shortcuts import render, redirect
+
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 
 # Login view
 def login_view(request):
     if request.user.is_authenticated:
         messages.success(request, "Anda sudah login.")
-        return redirect('profile')
+        # Arahkan sesuai role
+        if request.user.is_superuser:
+            return redirect("owner_dashboard")
+        elif request.user.groups.filter(name="Admin").exists():
+            return redirect("admin_dashboard")
+        else:
+            return redirect("profile")
     
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
@@ -39,28 +49,88 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, f"Selamat datang, {user.username}!")
-            return redirect('dashboard')
+
+            # Cek role
+            if user.is_superuser:
+                return redirect("dashboard")
+            elif user.groups.filter(name="Admin").exists():
+                return redirect("admin_dashboard")
+            else:
+                return redirect("profile")
         else:
             messages.error(request, "Login gagal! Username atau password salah.")
     else:
         form = AuthenticationForm()
     
-    return render(request, 'auth/login.html', {'form': form})
+    return render(request, "auth/login.html", {"form": form})
 
 
-# Logfrom django.contrib import messages
-from django.contrib.auth import logout
-from django.shortcuts import redirect
 
+# Logout view
 def logout_view(request):
     logout(request)
     messages.success(request, "Anda berhasil logout.")
     return redirect('login')
 
-# Profile view (tampilkan info user dan link ubah password)
+
+# Profile view
 @login_required
 def profile_view(request):
     return render(request, 'auth/profile.html')
+
+
+# Hanya Owner bisa buat Admin
+def is_owner(user):
+    return user.is_superuser
+
+def is_admin(user):
+    return user.groups.filter(name="Admin").exists()
+
+@user_passes_test(is_owner)
+def list_admin_view(request):
+    admin_group, created = Group.objects.get_or_create(name="Admin")
+    admins = User.objects.filter(groups=admin_group)
+    return render(request, "auth/list_admin.html", {"admins": admins})
+
+
+@user_passes_test(is_owner)
+def add_admin_view(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            admin_group = Group.objects.get(name="Admin")
+            user.groups.add(admin_group)
+            messages.success(request, f"Akun Admin '{user.username}' berhasil dibuat.")
+            return redirect("list_admin")
+    else:
+        form = UserCreationForm()
+    return render(request, "auth/add_admin.html", {"form": form})
+
+
+@user_passes_test(is_owner)
+def edit_admin_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    form = UserChangeForm(request.POST or None, instance=user)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Akun Admin '{user.username}' berhasil diperbarui.")
+            return redirect("list_admin")
+
+    return render(request, "auth/edit_admin.html", {"form": form, "user": user})
+
+
+@user_passes_test(is_owner)
+def delete_admin_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    username = user.username
+    user.delete()
+    messages.success(request, f"Akun Admin '{username}' berhasil dihapus.")
+    return redirect("list_admin")
+
+
 
 # Ubah password
 @login_required
@@ -80,6 +150,7 @@ def change_password(request):
 
 # Tambah Pelanggan
 @login_required
+@user_passes_test(is_admin)
 def tambah_pelanggan(request):
     if request.method == "POST":
         nama = request.POST['nama']
@@ -96,12 +167,14 @@ def tambah_pelanggan(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def list_pelanggan(request):
     data = Pelanggan.objects.all()
     return render(request, 'pelanggan/list_pelanggan.html', {'pelanggan': data})
 
 
 @login_required
+@user_passes_test(is_admin)
 def ubah_pelanggan(request, id):
     pelanggan = get_object_or_404(Pelanggan, id=id)
     if request.method == "POST":
@@ -115,6 +188,7 @@ def ubah_pelanggan(request, id):
 
 
 @login_required
+@user_passes_test(is_admin)
 def hapus_pelanggan(request, id):
     pelanggan = get_object_or_404(Pelanggan, id=id)
     pelanggan.delete()
@@ -123,9 +197,11 @@ def hapus_pelanggan(request, id):
 
 
 
+
 # Tambah Pesanan
 # Tambah Pesanan
 @login_required
+@user_passes_test(is_admin)
 def tambah_pesanan(request):
     pelanggan_list = Pelanggan.objects.all()
     if request.method == "POST":
@@ -143,6 +219,7 @@ def tambah_pesanan(request):
     return render(request, 'pesanan/tambah_pesanan.html', {'pelanggan_list': pelanggan_list})
 
 @login_required
+@user_passes_test(is_admin)
 def list_pesanan(request):
     data = Pesanan.objects.all()
     total_selesai = Pesanan.objects.filter(status=True).count()
@@ -157,6 +234,7 @@ def list_pesanan(request):
 
 
 @login_required
+@user_passes_test(is_admin)
 def ubah_pesanan(request, id):
     pesanan = get_object_or_404(Pesanan, id=id)
     pelanggan_list = Pelanggan.objects.all()
@@ -170,6 +248,7 @@ def ubah_pesanan(request, id):
     return render(request, 'pesanan/ubah_pesanan.html', {'pesanan': pesanan, 'pelanggan_list': pelanggan_list})
 
 @login_required
+@user_passes_test(is_admin)
 def hapus_pesanan(request, id):
     pesanan = get_object_or_404(Pesanan, id=id)
     pesanan.delete()
@@ -177,6 +256,7 @@ def hapus_pesanan(request, id):
     return redirect('list_pesanan')
 
 @login_required
+@user_passes_test(is_admin)
 def selesai_pesanan(request, id):
     pesanan = get_object_or_404(Pesanan, id=id)
     pesanan.status = True
@@ -194,6 +274,7 @@ from django.shortcuts import render
 from .models import Pesanan
 
 @login_required
+@user_passes_test(is_owner)
 def laporan_pesanan_bulanan(request):
     # ambil filter dari request
     bulan = request.GET.get('bulan')
@@ -270,13 +351,44 @@ def cetak_laporan_pesanan_bulanan(request):
 
 # Tambah Kriteria
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Kriteria
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Kriteria
 
 @login_required
 def tambah_kriteria(request):
     if request.method == "POST":
-        nama_kriteria = request.POST['nama_kriteria']
-        bobot = request.POST['bobot']
-        tipe = request.POST['tipe']
+        nama_kriteria = request.POST.get('nama_kriteria', '').strip()
+        tipe = request.POST.get('tipe')
+
+        try:
+            bobot = float(request.POST.get('bobot', 0))
+        except ValueError:
+            messages.error(request, "Bobot harus berupa angka.")
+            return redirect('tambah_kriteria')
+
+        # Hitung total bobot terbaru
+        total_bobot_saat_ini = sum(k.bobot for k in Kriteria.objects.all())
+        sisa_bobot = max(0, round(1 - total_bobot_saat_ini, 6))
+
+        # Validasi bobot tidak melebihi sisa
+        if bobot - sisa_bobot > 1e-6:
+            messages.error(request, f"Bobot terlalu besar. Sisa bobot yang bisa diinput: {sisa_bobot:.2f}")
+            return redirect('tambah_kriteria')
+        
+        # Cek jika total bobot sudah 1
+        total_bobot_baru = total_bobot_saat_ini + bobot
+        if abs(total_bobot_baru - 1) > 1e-6 and total_bobot_baru > 1:
+            messages.error(request, f"Total bobot harus tepat 1. Sekarang: {total_bobot_baru:.2f}")
+            return redirect('tambah_kriteria')
+
+
         Kriteria.objects.create(
             nama_kriteria=nama_kriteria,
             bobot=bobot,
@@ -284,31 +396,71 @@ def tambah_kriteria(request):
         )
         messages.success(request, "Kriteria berhasil ditambahkan.")
         return redirect('list_kriteria')
-    return render(request, 'kriteria/tambah_kriteria.html')
 
-@login_required
-def list_kriteria(request):
-    data = Kriteria.objects.all()
-    return render(request, 'kriteria/list_kriteria.html', {'kriteria': data})
+    # GET request → ambil total bobot terbaru lagi
+    total_bobot_saat_ini = sum(k.bobot for k in Kriteria.objects.all())
+    sisa_bobot = max(0, round(1 - total_bobot_saat_ini, 6))
+
+    return render(request, 'kriteria/tambah_kriteria.html', {
+        'sisa_bobot': sisa_bobot
+    })
+
+
+
 
 @login_required
 def ubah_kriteria(request, id):
     kriteria = get_object_or_404(Kriteria, id=id)
     if request.method == "POST":
+        bobot_baru = float(request.POST['bobot'])
+
+        total_bobot = (
+            sum(k.bobot for k in Kriteria.objects.exclude(id=id)) + bobot_baru
+        )
+        if abs(total_bobot - 1) > 0.0001:
+            messages.error(request, f"Total bobot harus 1. Sekarang: {total_bobot:.2f}")
+            return redirect('ubah_kriteria', id=id)
+
         kriteria.nama_kriteria = request.POST['nama_kriteria']
-        kriteria.bobot = request.POST['bobot']
+        kriteria.bobot = bobot_baru
         kriteria.tipe_kriteria = request.POST['tipe']
         kriteria.save()
         messages.success(request, "Kriteria berhasil diubah.")
         return redirect('list_kriteria')
     return render(request, 'kriteria/ubah_kriteria.html', {'kriteria': kriteria})
 
+
+@login_required
+def list_kriteria(request):
+    data = Kriteria.objects.all()
+    total_bobot = sum(k.bobot for k in data)
+
+    # cek status bobot
+    status_bobot = None
+    if abs(total_bobot - 1) < 1e-6:  
+        status_bobot = "pas"
+    elif total_bobot < 1:
+        status_bobot = "kurang"
+    else:
+        status_bobot = "lebih"
+
+    return render(request, 'kriteria/list_kriteria.html', {
+        'kriteria': data,
+        'total_bobot': round(total_bobot, 2),  # biar rapi
+        'status_bobot': status_bobot,
+        'sisa_bobot': round(1 - total_bobot, 2) if total_bobot < 1 else 0
+    })
+
+
+
 @login_required
 def hapus_kriteria(request, id):
     kriteria = get_object_or_404(Kriteria, id=id)
-    kriteria.delete()
+    kriteria.delete()  # hapus dari database
     messages.success(request, "Kriteria berhasil dihapus.")
+    # redirect ke tambah_kriteria agar sisa bobot terbaru langsung muncul
     return redirect('list_kriteria')
+
 
 
 
@@ -490,7 +642,7 @@ def cetak_hasil_moora_pdf(request):
     pdf_file = HTML(string=html_string).write_pdf()
 
     response = HttpResponse(pdf_file, content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="hasil_moora.pdf"'
+    response["Content-Disposition"] = 'inline; filename="hasil_moora.pdf"'
     return response
 
 
@@ -551,4 +703,61 @@ def dashboard(request):
         'tahun_list': tahun_list,
     })
 
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+from django.shortcuts import render, redirect
+from django.contrib import messages
+import datetime
+from .models import Pelanggan, Pesanan, Kriteria, Nilai
 
+
+@login_required
+def admin_dashboard(request):
+    # Batasi hanya untuk user di Group Admin
+    if not request.user.groups.filter(name="Admin").exists():
+        messages.error(request, "Anda tidak punya akses ke halaman ini.")
+        return redirect("login")
+    
+    
+
+    # Statistik umum
+    jumlah_pelanggan = Pelanggan.objects.count()
+    jumlah_pesanan = Pesanan.objects.count()
+    jumlah_kriteria = Kriteria.objects.count()
+    jumlah_nilai = Nilai.objects.count()
+
+    # Ambil filter tahun dari request
+    tahun_sekarang = datetime.date.today().year
+    tahun = int(request.GET.get('tahun', tahun_sekarang))
+
+    # Data pesanan per bulan sesuai tahun dipilih
+    pesanan_bulanan = (
+        Pesanan.objects.filter(tanggal_pesan__year=tahun)
+        .values('tanggal_pesan__month')
+        .annotate(total=Count('id'))
+        .order_by('tanggal_pesan__month')
+    )
+
+    labels = []
+    data = []
+    bulan_nama = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+                  "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+
+    for i in range(1, 13):
+        labels.append(bulan_nama[i - 1])
+        found = next((p['total'] for p in pesanan_bulanan if p['tanggal_pesan__month'] == i), 0)
+        data.append(found)
+
+    # daftar tahun dari 2022 sampai tahun sekarang
+    tahun_list = range(2022, tahun_sekarang + 1)
+
+    return render(request, "admin_dashboard.html", {
+        "jumlah_pelanggan": jumlah_pelanggan,
+        "jumlah_pesanan": jumlah_pesanan,
+        "jumlah_kriteria": jumlah_kriteria,
+        "jumlah_nilai": jumlah_nilai,
+        "labels": labels,
+        "data": data,
+        "tahun": tahun,
+        "tahun_list": tahun_list,
+    })

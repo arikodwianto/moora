@@ -6,16 +6,27 @@
         <div class="card-header">
             <h3>Tambah Kriteria</h3>
         </div>
+
+        {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %} mt-2">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {% endif %}
+
         <div class="card-body">
-            <form method="POST">
+            <p><strong>Sisa bobot: <span id="sisa_bobot">{{ sisa_bobot|floatformat }}</span></strong></p>
+
+            <form method="POST" id="form-kriteria">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label>Nama Kriteria</label>
                     <input type="text" name="nama_kriteria" class="form-control" placeholder="Masukkan nama kriteria" required>
                 </div>
                 <div class="mb-3">
-                    <label>Bobot</label>
-                    <input type="number" step="0.01" name="bobot" class="form-control" placeholder="Contoh: 0.5" required>
+                    <label>Bobot (0 - <span id="max_bobot">{{ sisa_bobot|floatformat }}</span>)</label>
+                    <input type="number" step="0.01" name="bobot" class="form-control" placeholder="Contoh: 0.5" required id="input_bobot" max="{{ sisa_bobot|floatformat }}">
                 </div>
                 <div class="mb-3">
                     <label>Tipe</label>
@@ -30,5 +41,28 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sisaBobotEl = document.getElementById('sisa_bobot');
+    const maxBobotEl = document.getElementById('max_bobot');
+    const inputBobot = document.getElementById('input_bobot');
+
+    // Ambil nilai sisa awal dari template
+    let sisaBobot = parseFloat(sisaBobotEl.textContent);
+
+    inputBobot.addEventListener('input', function() {
+        let nilai = parseFloat(this.value) || 0;
+        let sisaUpdate = (sisaBobot - nilai).toFixed(2);
+        if(sisaUpdate < 0) sisaUpdate = 0;
+        sisaBobotEl.textContent = sisaUpdate;
+    });
+
+    // Reset sisa bobot saat form disubmit
+    document.getElementById('form-kriteria').addEventListener('submit', function() {
+        sisaBobotEl.textContent = sisaBobot.toFixed(2);
+    });
+});
+</script>
 
 {% endblock %}

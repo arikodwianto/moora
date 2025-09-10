@@ -124,6 +124,12 @@ table.dataTable {
     display: inline-block;
     animation: shake 0.7s infinite;
 }
+/* Garis pemisah antar menu */
+/* garis pemisah antar item */
+.sidebar-item {
+  border-bottom: 1px solid #2c3e50; /* abu-abu gelap */
+}
+
 /* hover */
 .sidebar-item > .sidebar-link:hover {
   background-color: #0d6efd;
@@ -139,6 +145,7 @@ table.dataTable {
 
 
 
+
 	</style>
 	<!-- DataTables CSS Bootstrap 5 -->
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
@@ -150,7 +157,8 @@ table.dataTable {
 
 <body>
 	<div class="wrapper">
-		<nav id="sidebar" class="sidebar js-sidebar">
+<!-- Sidebar -->
+<nav id="sidebar" class="sidebar js-sidebar">
   <div class="sidebar-content js-simplebar">
     <a class="sidebar-brand" href="">
       <span class="align-middle">ALMAQUA</span>
@@ -159,8 +167,8 @@ table.dataTable {
     <ul class="sidebar-nav">
       <!-- Dashboard -->
       <li class="sidebar-header">Dashboard</li>
-      <li class="sidebar-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-        <a class="sidebar-link" href="{% url 'dashboard' %}">
+      <li class="sidebar-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+        <a class="sidebar-link" href="{% url 'admin_dashboard' %}">
           <i class="bi bi-house-add-fill"></i>
           <span class="align-middle">Dashboard</span>
         </a>
@@ -168,23 +176,34 @@ table.dataTable {
 
       <!-- Data Master -->
       <li class="sidebar-header">Data Master</li>
-      
-      <li class="sidebar-item {% if request.resolver_match.url_name == 'laporan_pesanan_bulanan' %}active{% endif %}">
-        <a class="sidebar-link" href="{% url 'laporan_pesanan_bulanan' %}">
-          <i class="align-middle me-2" data-feather="archive"></i>
-          <span class="align-middle">Laporan Pesanan </span>
+      <li class="sidebar-item {% if request.resolver_match.url_name == 'list_pelanggan' %}active{% endif %}">
+        <a class="sidebar-link" href="{% url 'list_pelanggan' %}">
+          <i class="align-middle" data-feather="users"></i>
+          <span class="align-middle">Data Pelanggan</span>
+        </a>
+      </li>
+      <li class="sidebar-item {% if request.resolver_match.url_name == 'list_pesanan' %}active{% endif %}">
+        <a class="sidebar-link" href="{% url 'list_pesanan' %}">
+          <i class="align-middle" data-feather="shopping-cart"></i>
+          <span class="align-middle">Data Pesanan</span>
         </a>
       </li>
 
       <!-- Seleksi Moora -->
       <li class="sidebar-header">Seleksi Moora</li>
-      <li class="sidebar-item {% if request.resolver_match.url_name == 'list_kriteria' %}active{% endif %}">
-        <a class="sidebar-link" href="{% url 'list_kriteria' %}">
-         <i class="align-middle me-2" data-feather="list"></i>
-          <span class="align-middle">Kriteria</span>
+      <li class="sidebar-item {% if request.resolver_match.url_name == 'list_nilai' %}active{% endif %}">
+        <a class="sidebar-link" href="{% url 'list_nilai' %}">
+          <i class="align-middle" data-feather="bar-chart-2"></i>
+          <span class="align-middle">Nilai Alternatif</span>
         </a>
       </li>
-     
+      <li class="sidebar-item {% if request.resolver_match.url_name == 'hasil_moora' %}active{% endif %}">
+        <a class="sidebar-link" href="{% url 'hasil_moora' %}">
+          <i class="align-middle" data-feather="trending-up"></i>
+          <span class="align-middle">Perhitungan MOORA</span>
+        </a>
+      </li>
+      
 
       <!-- Pengaturan -->
       <li class="sidebar-header">Pengaturan</li>
@@ -193,16 +212,8 @@ table.dataTable {
           <i class="align-middle" data-feather="settings"></i>
           <span class="align-middle">Data Pengguna</span>
         </a>
-              
+
       </li>
-      <li class="sidebar-item {% if request.resolver_match.url_name == 'list_admin' %}active{% endif %}">
-         <a class="sidebar-link" href="{% url 'list_admin' %}">
-          <i class="align-middle" data-feather="settings"></i>
-          <span class="align-middle">Tambah Data Admin</span>
-        </a>
-              
-      </li>
-       
 
       <!-- Logout -->
       <li class="sidebar-item">
@@ -217,8 +228,7 @@ table.dataTable {
 </nav>
 
 
-
-<!-- Main -->
+  <!-- Main -->
   <div class="main">
     <!-- Navbar -->
     <nav class="navbar navbar-expand navbar-light navbar-bg">
@@ -230,7 +240,7 @@ table.dataTable {
 <div class="flex-grow-1 px-3">
   <marquee behavior="scroll" direction="left" scrollamount="5"
            class="fw-semibold text-primary">
-    Selamat datang, {{ request.user.get_full_name|default:request.user.username }} (Owner)
+    Selamat datang, {{ request.user.get_full_name|default:request.user.username }} (Admin)
     di Sistem Pendukung Keputusan - MOORA
   </marquee>
 </div>
@@ -256,27 +266,26 @@ table.dataTable {
         </ul>
       </div>
     </nav>
-<!-- Main content -->
-<main class="content">
-  <div class="container mt-3">
 
-   {% if messages %}
-  {% for message in messages %}
-    {% if message.tags == 'success' %}
-      <script>
-        Swal.fire({
-          icon: 'success',
-          title: 'Berhasil!',
-          text: '{{ message }}',
-          timer: 2000,
-          showConfirmButton: false
-        });
-      </script>
-    {% endif %}
-  {% endfor %}
-{% endif %}
-
-<!-- Alert messages -->
+    <!-- Content -->
+    <main class="content">
+      <div class="container mt-3">
+        {% if messages %}
+          {% for message in messages %}
+            {% if message.tags == 'success' %}
+              <script>
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Berhasil!',
+                  text: '{{ message }}',
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+              </script>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        <!-- Alert messages -->
     {% if messages %}
       {% for message in messages %}
         <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -286,32 +295,33 @@ table.dataTable {
       {% endfor %}
     {% endif %}
 
-    {% block content %}
-    <!-- konten lain -->
-    {% endblock %}
-
-  </div>
-</main>
-
-
-			
-
-<footer class="footer">
-  <div class="container-fluid">
-    <div class="row text-muted justify-content-between align-items-center">
-      <div class="col-auto">
-        <p class="mb-0">
-          Sistem Pendukung Keputusan berbasis <strong>MOORA</strong> &copy; 2025.
-        </p>
+        {% block content %}
+          <!-- konten lain -->
+        {% endblock %}
       </div>
-      <div class="col-auto">
-        <p class="mb-0">
-          Dibangun oleh <a href="https://github.com/dina" target="_blank" class="text-muted"><strong>Dina</strong></a>
-        </p>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container-fluid">
+        <div class="row text-muted justify-content-between align-items-center">
+          <div class="col-auto">
+            <p class="mb-0">
+              Sistem Pendukung Keputusan berbasis <strong>MOORA</strong> &copy; 2025.
+            </p>
+          </div>
+          <div class="col-auto">
+            <p class="mb-0">
+              Dibangun oleh
+              <a href="https://github.com/dina" target="_blank" class="text-muted">
+                <strong>Dina</strong>
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+    </footer>
   </div>
-</footer>
 </div>
 
 

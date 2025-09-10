@@ -1,0 +1,7 @@
+<h2>Hapus Admin</h2>
+<p>Apakah Anda yakin ingin menghapus admin: {{ user.username }}?</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Ya, Hapus</button>
+  <a href="{% url 'list_admin' %}">Batal</a>
+</form>

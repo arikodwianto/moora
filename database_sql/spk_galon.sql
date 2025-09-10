@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 25, 2025 at 03:01 PM
+-- Generation Time: Sep 10, 2025 at 02:24 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.2.29
 
@@ -31,6 +31,13 @@ CREATE TABLE `auth_group` (
   `id` int NOT NULL,
   `name` varchar(150) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `auth_group`
+--
+
+INSERT INTO `auth_group` (`id`, `name`) VALUES
+(1, 'Admin');
 
 -- --------------------------------------------------------
 
@@ -132,8 +139,8 @@ CREATE TABLE `auth_user` (
 --
 
 INSERT INTO `auth_user` (`id`, `password`, `last_login`, `is_superuser`, `username`, `first_name`, `last_name`, `email`, `is_staff`, `is_active`, `date_joined`) VALUES
-(1, 'pbkdf2_sha256$600000$ypuZziOfqbOLm9m4IHtZXL$0O4HVxdB0CliLI2mSut2nCg7IK/UyuBSxJ3UIxveVIU=', '2025-08-25 14:27:23.084871', 1, 'admin', '', '', '', 1, 1, '2025-08-09 11:36:36.543529'),
-(2, 'pbkdf2_sha256$600000$nZl8PI0oyyfytsg1lma3cF$WhcHVqaaXAU1U09al3PbU/rvhLhCH3u9GWsMwJ/rY9A=', '2025-08-25 14:35:55.888384', 0, 'user1', '', '', '', 0, 1, '2025-08-25 14:35:45.754409');
+(1, 'pbkdf2_sha256$600000$h7tv0TOGohylieECmO6vXp$4jq2BK+8qNHVg20gtx9iPaCRa6p5nhBMfmlwmOdEWfM=', '2025-09-10 14:23:12.533081', 1, 'owner', '', '', '', 1, 1, '2025-09-10 12:13:31.532171'),
+(2, 'pbkdf2_sha256$600000$wNtWTo14rLwGCarPvy329l$yuVYjhmoVjeA4/TDyrs5ScCTWU9rOYpKlHXqEClNw/A=', '2025-09-10 14:10:49.472842', 0, 'admin', '', '', '', 0, 1, '2025-09-10 12:25:02.630162');
 
 -- --------------------------------------------------------
 
@@ -146,6 +153,13 @@ CREATE TABLE `auth_user_groups` (
   `user_id` int NOT NULL,
   `group_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `auth_user_groups`
+--
+
+INSERT INTO `auth_user_groups` (`id`, `user_id`, `group_id`) VALUES
+(1, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -177,10 +191,10 @@ CREATE TABLE `core_kriteria` (
 --
 
 INSERT INTO `core_kriteria` (`id`, `nama_kriteria`, `bobot`, `tipe_kriteria`) VALUES
-(3, 'Jumlah galon', 0.3, 'benefit'),
-(4, 'Prioritas', 0.25, 'benefit'),
-(5, 'Urgensi', 0.25, 'benefit'),
-(6, 'Waktu', 2, 'cost');
+(4, 'Jumlah galon', 0.3, 'benefit'),
+(5, 'Prioritas', 0.25, 'benefit'),
+(6, 'Urgensi', 0.25, 'benefit'),
+(7, 'Waktu Pemesanan', 0.2, 'cost');
 
 -- --------------------------------------------------------
 
@@ -200,58 +214,86 @@ CREATE TABLE `core_nilai` (
 --
 
 INSERT INTO `core_nilai` (`id`, `nilai`, `kriteria_id`, `pesanan_id`) VALUES
-(21, 4, 3, 8),
-(22, 5, 4, 8),
-(23, 3, 5, 8),
-(24, 2, 6, 8),
-(25, 2, 3, 9),
-(26, 3, 4, 9),
-(27, 4, 5, 9),
-(28, 5, 6, 9),
-(29, 5, 3, 10),
-(30, 4, 4, 10),
-(31, 2, 5, 10),
-(32, 3, 6, 10),
-(33, 3, 3, 11),
-(34, 2, 4, 11),
-(35, 5, 5, 11),
-(36, 4, 6, 11),
-(37, 4, 3, 12),
-(38, 3, 4, 12),
-(39, 2, 5, 12),
-(40, 5, 6, 12),
-(41, 1, 3, 13),
-(42, 5, 4, 13),
-(43, 4, 5, 13),
-(44, 3, 6, 13),
-(45, 5, 3, 14),
-(46, 4, 4, 14),
-(47, 3, 5, 14),
-(48, 2, 6, 14),
-(49, 2, 3, 15),
-(50, 3, 4, 15),
-(51, 5, 5, 15),
-(52, 4, 6, 15),
-(53, 3, 3, 16),
-(54, 2, 4, 16),
-(55, 4, 5, 16),
-(56, 5, 6, 16),
-(57, 4, 3, 17),
-(58, 5, 4, 17),
-(59, 2, 5, 17),
-(60, 3, 6, 17),
-(61, 5, 3, 18),
-(62, 4, 4, 18),
-(63, 3, 5, 18),
-(64, 2, 6, 18),
-(65, 2, 3, 19),
-(66, 3, 4, 19),
-(67, 5, 5, 19),
-(68, 4, 6, 19),
-(69, 3, 3, 20),
-(70, 2, 4, 20),
-(71, 4, 5, 20),
-(72, 5, 6, 20);
+(47, 0.7, 4, 3),
+(48, 0.8, 5, 3),
+(49, 0.6, 6, 3),
+(50, 0.9, 7, 3),
+(51, 0.8, 4, 4),
+(52, 0.7, 5, 4),
+(53, 0.7, 6, 4),
+(54, 0.8, 7, 4),
+(55, 0.6, 4, 5),
+(56, 0.9, 5, 5),
+(57, 0.8, 6, 5),
+(58, 0.7, 7, 5),
+(59, 0.9, 4, 6),
+(60, 0.6, 5, 6),
+(61, 0.7, 6, 6),
+(62, 0.8, 7, 6),
+(63, 0.8, 4, 7),
+(64, 0.7, 5, 7),
+(65, 0.9, 6, 7),
+(66, 0.6, 7, 7),
+(67, 0.7, 4, 8),
+(68, 0.8, 5, 8),
+(69, 0.6, 6, 8),
+(70, 0.9, 7, 8),
+(71, 0.6, 4, 9),
+(72, 0.9, 5, 9),
+(73, 0.8, 6, 9),
+(74, 0.7, 7, 9),
+(75, 0.9, 4, 10),
+(76, 0.7, 5, 10),
+(77, 0.7, 6, 10),
+(78, 0.8, 7, 10),
+(79, 0.7, 4, 11),
+(80, 0.8, 5, 11),
+(81, 0.9, 6, 11),
+(82, 0.6, 7, 11),
+(83, 0.8, 4, 12),
+(84, 0.7, 5, 12),
+(85, 0.6, 6, 12),
+(86, 0.9, 7, 12),
+(87, 0.6, 4, 13),
+(88, 0.8, 5, 13),
+(89, 0.7, 6, 13),
+(90, 0.9, 7, 13),
+(91, 0.9, 4, 14),
+(92, 0.7, 5, 14),
+(93, 0.8, 6, 14),
+(94, 0.6, 7, 14),
+(95, 0.8, 4, 15),
+(96, 0.9, 5, 15),
+(97, 0.7, 6, 15),
+(98, 0.6, 7, 15),
+(99, 0.7, 4, 16),
+(100, 0.6, 5, 16),
+(101, 0.8, 6, 16),
+(102, 0.9, 7, 16),
+(103, 0.9, 4, 17),
+(104, 0.7, 5, 17),
+(105, 0.6, 6, 17),
+(106, 0.8, 7, 17),
+(107, 0.6, 4, 18),
+(108, 0.9, 5, 18),
+(109, 0.8, 6, 18),
+(110, 0.7, 7, 18),
+(111, 0.7, 4, 19),
+(112, 0.8, 5, 19),
+(113, 0.9, 6, 19),
+(114, 0.6, 7, 19),
+(115, 0.8, 4, 20),
+(116, 0.7, 5, 20),
+(117, 0.6, 6, 20),
+(118, 0.9, 7, 20),
+(119, 0.9, 4, 21),
+(120, 0.6, 5, 21),
+(121, 0.8, 6, 21),
+(122, 0.7, 7, 21),
+(123, 0.7, 4, 22),
+(124, 0.9, 5, 22),
+(125, 0.6, 6, 22),
+(126, 0.8, 7, 22);
 
 -- --------------------------------------------------------
 
@@ -271,26 +313,26 @@ CREATE TABLE `core_pelanggan` (
 --
 
 INSERT INTO `core_pelanggan` (`id`, `nama_pelanggan`, `alamat`, `no_hp`) VALUES
-(15, 'Andi Saputra', 'Jl. Merdeka No. 10', '081234567801'),
-(16, 'Budi Santoso', 'Jl. Wiratno No. 5', '081234567802'),
-(17, 'Citra Dewi', 'Jl. Sultan Sulaiman No. 12', '081234567803'),
-(18, 'Dedi Firmansyah', 'Jl. Basuki Rahmat No. 7', '081234567804'),
-(19, 'Eka Pratama', 'Jl. Raja Haji Fisabilillah No. 3', '081234567805'),
-(20, 'Fajar Nugroho', 'Jl. Ir. Sutami No. 14', '081234567806'),
-(21, 'Gina Lestari', 'Jl. Hang Tuah No. 21', '081234567807'),
-(22, 'Hariyanto', 'Jl. D.I. Panjaitan No. 8', '081234567808'),
-(23, 'Indah Puspita', 'Jl. Kijang Lama No. 15', '081234567809'),
-(24, 'Joko Widodo', 'Jl. Bakar Batu No. 2', '081234567810'),
-(25, 'Kurniawan Saputra', 'Jl. Agus Salim No. 11', '081234567811'),
-(26, 'Lestari Wulandari', 'Jl. Pramuka No. 9', '081234567812'),
-(27, 'Mahmud Rizky', 'Jl. Sei Jang No. 22', '081234567813'),
-(28, 'Nadia Putri', 'Jl. Tugu Pahlawan No. 33', '081234567814'),
-(29, 'Oscar Pratama', 'Jl. Kota Piring No. 44', '081234567815'),
-(30, 'Putri Ayu', 'Jl. Bukit Bestari No. 55', '081234567816'),
-(31, 'Qori Maulida', 'Jl. Pinang Merah No. 66', '081234567817'),
-(32, 'Rizal Hakim', 'Jl. Dompak No. 77', '081234567818'),
-(33, 'Siti Aminah', 'Jl. Kampung Baru No. 88', '081234567819'),
-(34, 'Taufik Hidayat', 'Jl. Senggarang No. 99', '081234567820');
+(3, 'Andi Pratama', 'Jl. Basuki Rahmat', '081234567890'),
+(4, 'Budi Santoso', 'Jl. DI Panjaitan', '082134567891'),
+(5, 'Citra Dewi', 'Jl. Sultan Machmud', '083234567892'),
+(6, 'Dewi Lestari', 'Jl. Merdeka', '084234567893'),
+(7, 'Eko Wijaya', 'Jl. Ketapang', '085234567894'),
+(8, 'Fajar Nugroho', 'Jl. Kamboja', '086234567895'),
+(9, 'Gina Putri', 'Jl. Potong Lembu', '087234567896'),
+(10, 'Hariyanto', 'Jl. Brigjen Katamso', '088234567897'),
+(11, 'Indah Sari', 'Jl. Wiratno', '089234567898'),
+(12, 'Joko Susanto', 'Jl. Tambak', '081034567899'),
+(13, 'Kartika Ayu', 'Jl. Pemuda', '081134567800'),
+(14, 'Lukman Hakim', 'Jl. Pos', '081234567801'),
+(15, 'Mega Wulandari', 'Jl. Pramuka', '081334567802'),
+(16, 'Nanda Pratama', 'Jl. Kuantan', '081434567803'),
+(17, 'Oka Saputra', 'Jl. Sumatera', '081534567804'),
+(18, 'Putri Amelia', 'Jl. Kepodang', '081634567805'),
+(19, 'Rizky Kurniawan', 'Jl. Rawa Sari', '081734567806'),
+(20, 'Siti Aisyah', 'Jl. Haji Agus Salim', '081834567807'),
+(21, 'Taufik Hidayat', 'Jl. Potong Lembu 2', '081934567808'),
+(22, 'Umi Kalsum', 'Jl. Sultan Abdulrahman', '082034567809');
 
 -- --------------------------------------------------------
 
@@ -316,28 +358,35 @@ CREATE TABLE `core_pesanan` (
   `tanggal_pesan` date NOT NULL,
   `jumlah_galon` int NOT NULL,
   `tanggal_pengiriman` date NOT NULL,
-  `pelanggan_id` bigint NOT NULL,
-  `status` tinyint(1) NOT NULL
+  `status` tinyint(1) NOT NULL,
+  `pelanggan_id` bigint NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `core_pesanan`
 --
 
-INSERT INTO `core_pesanan` (`id`, `tanggal_pesan`, `jumlah_galon`, `tanggal_pengiriman`, `pelanggan_id`, `status`) VALUES
-(8, '2025-07-05', 2, '2025-07-06', 15, 1),
-(9, '2025-07-10', 4, '2025-07-11', 20, 0),
-(10, '2025-07-20', 1, '2025-07-21', 25, 1),
-(11, '2025-08-01', 3, '2025-08-02', 15, 1),
-(12, '2025-08-03', 2, '2025-08-04', 16, 0),
-(13, '2025-08-05', 5, '2025-08-06', 19, 1),
-(14, '2025-08-07', 1, '2025-08-08', 21, 0),
-(15, '2025-08-08', 4, '2025-08-09', 24, 1),
-(16, '2025-08-10', 2, '2025-08-11', 26, 0),
-(17, '2025-08-12', 3, '2025-08-13', 28, 1),
-(18, '2025-08-14', 6, '2025-08-15', 30, 0),
-(19, '2025-08-16', 2, '2025-08-17', 32, 1),
-(20, '2025-08-18', 4, '2025-08-19', 34, 0);
+INSERT INTO `core_pesanan` (`id`, `tanggal_pesan`, `jumlah_galon`, `tanggal_pengiriman`, `status`, `pelanggan_id`) VALUES
+(3, '2025-08-01', 2, '2025-08-02', 0, 3),
+(4, '2025-08-03', 5, '2025-08-04', 1, 4),
+(5, '2025-08-05', 3, '2025-08-06', 0, 5),
+(6, '2025-08-07', 1, '2025-08-08', 0, 6),
+(7, '2025-08-09', 4, '2025-08-10', 1, 7),
+(8, '2025-08-11', 6, '2025-08-12', 0, 8),
+(9, '2025-08-13', 2, '2025-08-14', 1, 9),
+(10, '2025-08-15', 3, '2025-08-16', 0, 10),
+(11, '2025-08-17', 5, '2025-08-18', 0, 11),
+(12, '2025-08-19', 2, '2025-08-20', 1, 12),
+(13, '2025-08-21', 1, '2025-08-22', 0, 13),
+(14, '2025-08-23', 4, '2025-08-24', 0, 14),
+(15, '2025-08-25', 3, '2025-08-26', 1, 15),
+(16, '2025-08-27', 6, '2025-08-28', 0, 16),
+(17, '2025-08-29', 2, '2025-08-30', 1, 17),
+(18, '2025-08-31', 5, '2025-09-01', 0, 18),
+(19, '2025-09-02', 4, '2025-09-03', 1, 19),
+(20, '2025-09-04', 2, '2025-09-05', 0, 20),
+(21, '2025-09-06', 3, '2025-09-07', 0, 21),
+(22, '2025-09-08', 1, '2025-09-09', 1, 22);
 
 -- --------------------------------------------------------
 
@@ -403,26 +452,25 @@ CREATE TABLE `django_migrations` (
 --
 
 INSERT INTO `django_migrations` (`id`, `app`, `name`, `applied`) VALUES
-(1, 'contenttypes', '0001_initial', '2025-08-09 11:36:15.133755'),
-(2, 'auth', '0001_initial', '2025-08-09 11:36:15.740742'),
-(3, 'admin', '0001_initial', '2025-08-09 11:36:15.875333'),
-(4, 'admin', '0002_logentry_remove_auto_add', '2025-08-09 11:36:15.891283'),
-(5, 'admin', '0003_logentry_add_action_flag_choices', '2025-08-09 11:36:15.902584'),
-(6, 'contenttypes', '0002_remove_content_type_name', '2025-08-09 11:36:15.984618'),
-(7, 'auth', '0002_alter_permission_name_max_length', '2025-08-09 11:36:16.047383'),
-(8, 'auth', '0003_alter_user_email_max_length', '2025-08-09 11:36:16.085844'),
-(9, 'auth', '0004_alter_user_username_opts', '2025-08-09 11:36:16.124943'),
-(10, 'auth', '0005_alter_user_last_login_null', '2025-08-09 11:36:16.182063'),
-(11, 'auth', '0006_require_contenttypes_0002', '2025-08-09 11:36:16.184784'),
-(12, 'auth', '0007_alter_validators_add_error_messages', '2025-08-09 11:36:16.196214'),
-(13, 'auth', '0008_alter_user_username_max_length', '2025-08-09 11:36:16.271674'),
-(14, 'auth', '0009_alter_user_last_name_max_length', '2025-08-09 11:36:16.333767'),
-(15, 'auth', '0010_alter_group_name_max_length', '2025-08-09 11:36:16.359130'),
-(16, 'auth', '0011_update_proxy_permissions', '2025-08-09 11:36:16.369341'),
-(17, 'auth', '0012_alter_user_first_name_max_length', '2025-08-09 11:36:16.425085'),
-(18, 'core', '0001_initial', '2025-08-09 11:36:16.680633'),
-(19, 'sessions', '0001_initial', '2025-08-09 11:36:16.726625'),
-(20, 'core', '0002_pesanan_status', '2025-08-25 14:26:21.032284');
+(1, 'contenttypes', '0001_initial', '2025-09-10 12:13:02.165539'),
+(2, 'auth', '0001_initial', '2025-09-10 12:13:02.621671'),
+(3, 'admin', '0001_initial', '2025-09-10 12:13:02.741565'),
+(4, 'admin', '0002_logentry_remove_auto_add', '2025-09-10 12:13:02.749850'),
+(5, 'admin', '0003_logentry_add_action_flag_choices', '2025-09-10 12:13:02.765516'),
+(6, 'contenttypes', '0002_remove_content_type_name', '2025-09-10 12:13:02.853885'),
+(7, 'auth', '0002_alter_permission_name_max_length', '2025-09-10 12:13:02.917770'),
+(8, 'auth', '0003_alter_user_email_max_length', '2025-09-10 12:13:02.965857'),
+(9, 'auth', '0004_alter_user_username_opts', '2025-09-10 12:13:02.981675'),
+(10, 'auth', '0005_alter_user_last_login_null', '2025-09-10 12:13:03.046387'),
+(11, 'auth', '0006_require_contenttypes_0002', '2025-09-10 12:13:03.046387'),
+(12, 'auth', '0007_alter_validators_add_error_messages', '2025-09-10 12:13:03.062928'),
+(13, 'auth', '0008_alter_user_username_max_length', '2025-09-10 12:13:03.118815'),
+(14, 'auth', '0009_alter_user_last_name_max_length', '2025-09-10 12:13:03.183342'),
+(15, 'auth', '0010_alter_group_name_max_length', '2025-09-10 12:13:03.215034'),
+(16, 'auth', '0011_update_proxy_permissions', '2025-09-10 12:13:03.230871'),
+(17, 'auth', '0012_alter_user_first_name_max_length', '2025-09-10 12:13:03.294943'),
+(18, 'core', '0001_initial', '2025-09-10 12:13:03.576785'),
+(19, 'sessions', '0001_initial', '2025-09-10 12:13:03.617498');
 
 -- --------------------------------------------------------
 
@@ -441,9 +489,7 @@ CREATE TABLE `django_session` (
 --
 
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
-('attkntea5msylib5j9as2we8mtp9rafz', '.eJxVjDsOwjAQBe_iGln-fyjpcwZrvV7hALKlOKkQd0eWUkD7Zua9WYJjr-kYtKW1sCuT7PK7ZcAntQnKA9q9c-xt39bMp8JPOvjSC71up_t3UGHUWQcRo3bR2yyiJKFCyE5pAVmSA3Rgs7VkjfCIYEqJ5Mk4ZYLxQUmN7PMFwnI3Gg:1uq5Pn:T3LO2LKY_wPgTHjgTW-isp4qIjvnrdVbBVTfKn6sY2Y', '2025-09-07 07:45:23.375778'),
-('erohxx1hbzuu8xpl17s7yhz8zz9re9md', '.eJxVjDsOwjAQBe_iGln-fyjpcwZrvV7hALKlOKkQd0eWUkD7Zua9WYJjr-kYtKW1sCuT7PK7ZcAntQnKA9q9c-xt39bMp8JPOvjSC71up_t3UGHUWQcRo3bR2yyiJKFCyE5pAVmSA3Rgs7VkjfCIYEqJ5Mk4ZYLxQUmN7PMFwnI3Gg:1ukxcR:ShuMTtC-HHwoGk3HwEv9ToJ_D-ZZ5Egp4J9Z9bKlkDY', '2025-08-24 04:25:15.441210'),
-('ptulyjdvfhvtxob21e08knn3om93mkus', '.eJxVjEEOwiAQRe_C2pAAI1CX7j0DAWZGqgaS0q4a764kXejy__fydhHitpawdVrCjOIitDj9finmJ9UB8BHrvcnc6rrMSQ5FHrTLW0N6XQ_3L1BiLyM7oSZjkT0wKALHicDClFXSFg2wYgccGc743ZiMds4jkk7KZa-jeH8A8r44cQ:1uqYId:39w5sq_KtMCyg-3vyfXE7B8ntidspXAkDOa7Y5fyQtw', '2025-09-08 14:35:55.896972');
+('fh9ayxla5rpl6lbkdynquxs0lrgc7tgf', '.eJxVjEEOwiAQRe_C2pCWDgVduu8ZyMwwSNVAUtqV8e7apAvd_vfef6mA25rD1mQJc1QX1avT70bIDyk7iHcst6q5lnWZSe-KPmjTU43yvB7u30HGlr-10EDOnx0JdsalZJgFPPhOcCSOksCLFcMUEzBEA0PvwY7AaD0IJ_X-ABeYOS0:1uwLj6:Y49s_Rm89aeDVdOWLROVvAfWD5KHpVXbdIhPXJ4tDzs', '2025-09-24 14:23:12.539326');
 
 --
 -- Indexes for dumped tables
@@ -564,7 +610,7 @@ ALTER TABLE `django_session`
 -- AUTO_INCREMENT for table `auth_group`
 --
 ALTER TABLE `auth_group`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `auth_group_permissions`
@@ -588,7 +634,7 @@ ALTER TABLE `auth_user`
 -- AUTO_INCREMENT for table `auth_user_groups`
 --
 ALTER TABLE `auth_user_groups`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `auth_user_user_permissions`
@@ -606,13 +652,13 @@ ALTER TABLE `core_kriteria`
 -- AUTO_INCREMENT for table `core_nilai`
 --
 ALTER TABLE `core_nilai`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT for table `core_pelanggan`
 --
 ALTER TABLE `core_pelanggan`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `core_pengiriman`
@@ -624,7 +670,7 @@ ALTER TABLE `core_pengiriman`
 -- AUTO_INCREMENT for table `core_pesanan`
 --
 ALTER TABLE `core_pesanan`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `django_admin_log`
@@ -642,7 +688,7 @@ ALTER TABLE `django_content_type`
 -- AUTO_INCREMENT for table `django_migrations`
 --
 ALTER TABLE `django_migrations`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Constraints for dumped tables

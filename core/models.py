@@ -1,4 +1,30 @@
 from django.db import models
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
+
+def is_owner(user):
+    return user.is_superuser  # hanya superuser yang dianggap owner
+
+
+@user_passes_test(is_owner)
+def add_admin_view(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Tambah ke group Admin
+            admin_group = Group.objects.get(name="Admin")
+            user.groups.add(admin_group)
+            messages.success(request, f"Akun Admin '{user.username}' berhasil dibuat.")
+            return redirect("dashboard")
+    else:
+        form = UserCreationForm()
+    return render(request, "auth/add_admin.html", {"form": form})
+
 
 class Pelanggan(models.Model):
     nama_pelanggan = models.CharField(max_length=200)
